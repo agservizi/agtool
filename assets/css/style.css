@@ -5,7 +5,7 @@
 /* Stili generali */
 body {
     font-size: 14px;
-    padding-top: 80px; /* Spazio sufficiente per la navbar fissa */
+    padding-top: 100px; /* Spazio maggiore per la navbar fissa e i titoli */
 }
 
 /* Personalizzazione del direct-chat */
