@@ -101,13 +101,15 @@ include 'header.php';
                         <input type="number" step="0.01" name="amount" class="form-control" placeholder="Importo" required>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <select name="type" class="form-control" required>
+                        <select name="type" class="form-control" id="recurring-type" required>
                             <option value="entrata">Entrata</option>
                             <option value="uscita">Uscita</option>
                         </select>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <input type="text" name="category" class="form-control" placeholder="Categoria">
+                        <select name="category" class="form-control" id="recurring-category" required>
+                            <option value="">Seleziona categoria</option>
+                        </select>
                     </div>
                     <div class="col-md-3 mb-2">
                         <input type="date" name="start_date" class="form-control" required>
@@ -128,6 +130,43 @@ include 'header.php';
                     </div>
                 </div>
             </form>
+            <script>
+document.addEventListener('DOMContentLoaded', function() {
+    function loadRecurringCategories(type) {
+        const categorySelect = document.getElementById('recurring-category');
+        if (!categorySelect) return;
+        categorySelect.innerHTML = '<option value="">Caricamento...</option>';
+        fetch('get_categories.php?type=' + type)
+            .then(response => response.json())
+            .then(data => {
+                categorySelect.innerHTML = '';
+                if (data.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = 'Altro';
+                    option.textContent = 'Altro';
+                    categorySelect.appendChild(option);
+                } else {
+                    data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.name;
+                        option.textContent = category.name;
+                        categorySelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(() => {
+                categorySelect.innerHTML = '<option value="Altro">Altro</option>';
+            });
+    }
+    const typeSelect = document.getElementById('recurring-type');
+    if (typeSelect) {
+        loadRecurringCategories(typeSelect.value);
+        typeSelect.addEventListener('change', function() {
+            loadRecurringCategories(this.value);
+        });
+    }
+});
+</script>
             <h5>Elenco Ricorrenze</h5>
             <table class="table table-bordered table-striped">
                 <thead>
