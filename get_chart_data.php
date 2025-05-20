@@ -112,67 +112,6 @@ if ($chart_type === 'expense_categories') {
     exit;
 }
 
-// Previsioni di spesa/risparmio
-if ($chart_type === 'forecast') {
-    $category = isset($_GET['category']) ? clean_input($_GET['category']) : '';
-    $now = date('Y-m-01');
-    $labels = [];
-    $expense_history = [];
-    $income_history = [];
-    // Calcola la media degli ultimi 3 mesi
-    for ($i = 3; $i >= 1; $i--) {
-        $month = date('m', strtotime("-$i months"));
-        $year = date('Y', strtotime("-$i months"));
-        $cat_filter = $category ? " AND category='".$conn->real_escape_string($category)."'" : '';
-        $sql_exp = "SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND MONTH(date)=$month AND YEAR(date)=$year$cat_filter";
-        $sql_inc = "SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND MONTH(date)=$month AND YEAR(date)=$year$cat_filter";
-        $res_exp = $conn->query($sql_exp);
-        $res_inc = $conn->query($sql_inc);
-        $expense_history[] = $res_exp->fetch_assoc()['total'];
-        $income_history[] = $res_inc->fetch_assoc()['total'];
-    }
-    $avg_exp = count($expense_history) ? array_sum($expense_history)/count($expense_history) : 0;
-    $avg_inc = count($income_history) ? array_sum($income_history)/count($income_history) : 0;
-    // Spesa/entrata attuale mese
-    $cur_month = date('m');
-    $cur_year = date('Y');
-    $cat_filter = $category ? " AND category='".$conn->real_escape_string($category)."'" : '';
-    $sql_exp = "SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND MONTH(date)=$cur_month AND YEAR(date)=$cur_year$cat_filter";
-    $sql_inc = "SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND MONTH(date)=$cur_month AND YEAR(date)=$cur_year$cat_filter";
-    $cur_exp = $conn->query($sql_exp)->fetch_assoc()['total'];
-    $cur_inc = $conn->query($sql_inc)->fetch_assoc()['total'];
-    // Previsione mese prossimo = media ultimi 3 mesi
-    $forecast_exp = $avg_exp;
-    $forecast_inc = $avg_inc;
-    // Alert se la spesa attuale supera la media
-    $alert = null;
-    // Controllo limiti personalizzati
-    if ($category) {
-        $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
-        if ($user_id) {
-            $sql_limit = "SELECT monthly_limit FROM category_limits WHERE user_id = $user_id AND category = '".$conn->real_escape_string($category)."'";
-            $res_limit = $conn->query($sql_limit);
-            if ($res_limit && $row_limit = $res_limit->fetch_assoc()) {
-                $limit = floatval($row_limit['monthly_limit']);
-                if ($cur_exp > $limit) {
-                    $alert = "Hai superato il limite mensile di spesa per la categoria '$category' (€".number_format($limit,2,',','.').")!";
-                }
-            }
-        }
-    }
-    if (!$alert && $cur_exp > $avg_exp * 1.1 && $cur_exp > 0) {
-        $alert = $category ? 'Attenzione: la spesa di questo mese per la categoria \''.$category.'\' supera la media!' : 'Attenzione: la spesa di questo mese supera la media degli ultimi mesi!';
-    }
-    echo json_encode([
-        'current_expense' => $cur_exp,
-        'current_income' => $cur_inc,
-        'forecast_expense' => $forecast_exp,
-        'forecast_income' => $forecast_inc,
-        'alert' => $alert
-    ]);
-    exit;
-}
-
 // Se il tipo di grafico non è riconosciuto
 echo json_encode(['error' => 'Tipo di grafico non valido']);
 ?>

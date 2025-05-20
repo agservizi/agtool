@@ -13,11 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($user_id);
-            $stmt->fetch();
-            session_regenerate_id(true);
+            session_start();
             $_SESSION['user_phone'] = $phone;
-            $_SESSION['user_id'] = $user_id;
             header('Location: index.php');
             exit;
         } else {

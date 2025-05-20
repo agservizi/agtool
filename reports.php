@@ -150,16 +150,6 @@ include 'header.php';
         </div>
     </div>
     
-    <div id="forecast-widget"></div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Se è selezionata una categoria, mostra la previsione per quella categoria
-        var cat = '';
-        try { cat = document.querySelector('[name=category]').value; } catch(e){}
-        showForecastWidget(cat);
-    });
-    </script>
-    
     <?php
     // Report Mensile
     if ($view == 'monthly') {

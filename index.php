@@ -200,8 +200,6 @@ $stmt->close();
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <div id="forecast-widget"></div>
-                    <script>document.addEventListener('DOMContentLoaded',showForecastWidget);</script>
                     <!-- Statistiche principali -->
                     <div class="row">
                         <div class="col-lg-3 col-6">

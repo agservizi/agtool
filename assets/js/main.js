@@ -572,25 +572,3 @@ function runRecurringAjax() {
         })
         .catch(() => showToast('error', 'Errore di connessione con il server'));
 }
-
-/**
- * Mostra il widget di previsione spesa/risparmio
- */
-function showForecastWidget(category = null) {
-    let url = 'get_chart_data.php?type=forecast';
-    if (category) url += '&category=' + encodeURIComponent(category);
-    fetch(url)
-        .then(r => r.json())
-        .then(data => {
-            let html = `<div class='card mb-3'><div class='card-body'>
-                <h5 class='mb-2'><i class='fas fa-chart-line'></i> Previsione spesa/risparmio${category ? ' - ' + category : ''}</h5>
-                <div>Spesa attuale mese: <b>€${parseFloat(data.current_expense).toLocaleString('it-IT', {minimumFractionDigits:2})}</b></div>
-                <div>Entrata attuale mese: <b>€${parseFloat(data.current_income).toLocaleString('it-IT', {minimumFractionDigits:2})}</b></div>
-                <div>Previsione spesa mese prossimo: <b>€${parseFloat(data.forecast_expense).toLocaleString('it-IT', {minimumFractionDigits:2})}</b></div>
-                <div>Previsione entrata mese prossimo: <b>€${parseFloat(data.forecast_income).toLocaleString('it-IT', {minimumFractionDigits:2})}</b></div>
-            </div></div>`;
-            const el = document.getElementById('forecast-widget');
-            if (el) el.innerHTML = html;
-            if (data.alert) showToast('error', data.alert);
-        });
-}
