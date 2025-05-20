@@ -58,14 +58,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             echo json_encode(['status' => 'success', 'message' => 'Obiettivo salvato con successo']);
         } else {
-            header('Location: savings.php?success=1');
+            header('Location: savings?success=1');
         }
         exit;
     } else {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             echo json_encode(['status' => 'error', 'message' => 'Errore nel salvataggio dell\'obiettivo']);
         } else {
-            header('Location: savings.php?error=1');
+            header('Location: savings?error=1');
         }
         exit;
     }

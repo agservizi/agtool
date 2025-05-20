@@ -3,7 +3,7 @@ session_start();
 require_once 'inc/config.php';
 
 if (!isset($_SESSION['user_phone'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -16,7 +16,7 @@ if ($stmt->num_rows === 0) {
     $stmt->close();
     session_unset();
     session_destroy();
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 $stmt->close();
@@ -54,7 +54,7 @@ $stmt->close();
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php" class="nav-link">Home</a>
+                    <a href="index" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
                     <a href="#" class="nav-link" data-toggle="modal" data-target="#addTransactionModal">Nuova Transazione</a>
@@ -129,13 +129,13 @@ $stmt->close();
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a href="index.php" class="nav-link active">
+                            <a href="index" class="nav-link active">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="transactions.php" class="nav-link">
+                            <a href="transactions" class="nav-link">
                                 <i class="nav-icon fas fa-exchange-alt"></i>
                                 <p>Transazioni</p>
                             </a>
@@ -159,7 +159,7 @@ $stmt->close();
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="reports.php" class="nav-link">
+                            <a href="reports" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>Reportistica</p>
                             </a>
@@ -230,7 +230,7 @@ $stmt->close();
                                     <p>Bilancio Totale</p>
                                 </div>
                                 <div class="icon"><i class="fas fa-wallet"></i></div>
-                                <a href="transactions.php" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                                <a href="transactions" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                         <div class="col-lg-3 col-6">
@@ -240,7 +240,7 @@ $stmt->close();
                                     <p>Entrate Totali</p>
                                 </div>
                                 <div class="icon"><i class="fas fa-arrow-up"></i></div>
-                                <a href="transactions.php?type=entrata" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                                <a href="transactions?type=entrata" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                         <div class="col-lg-3 col-6">
@@ -250,7 +250,7 @@ $stmt->close();
                                     <p>Uscite Totali</p>
                                 </div>
                                 <div class="icon"><i class="fas fa-arrow-down"></i></div>
-                                <a href="transactions.php?type=uscita" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                                <a href="transactions?type=uscita" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                         <div class="col-lg-3 col-6">
@@ -266,7 +266,7 @@ $stmt->close();
                                     <p>Risparmio del Mese</p>
                                 </div>
                                 <div class="icon"><i class="fas fa-piggy-bank"></i></div>
-                                <a href="reports.php?view=monthly" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                                <a href="reports?view=monthly" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                     </div>
@@ -319,7 +319,7 @@ $stmt->close();
                                     </div>
                                 </div>
                                 <div class="card-footer text-center">
-                                    <a href="transactions.php" class="uppercase">Vedi Tutte le Transazioni</a>
+                                    <a href="transactions" class="uppercase">Vedi Tutte le Transazioni</a>
                                 </div>
                             </div>
                             <!-- /.card -->
@@ -543,7 +543,7 @@ $stmt->close();
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="process_goal.php" method="post" id="goal-form">
+                <form action="process_goal" method="post" id="goal-form">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="goal-name">Nome dell'obiettivo</label>

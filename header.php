@@ -33,7 +33,7 @@ require_once 'inc/config.php';
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index.php" class="nav-link">Home</a>
+                    <a href="index" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
                     <a href="#" class="nav-link" data-toggle="modal" data-target="#addTransactionModal">Nuova Transazione</a>
@@ -111,55 +111,55 @@ require_once 'inc/config.php';
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a href="index.php" class="nav-link">
+                            <a href="index" class="nav-link">
                                 <i class="nav-icon fas fa-home"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="transactions.php" class="nav-link">
+                            <a href="transactions" class="nav-link">
                                 <i class="nav-icon fas fa-exchange-alt"></i>
                                 <p>Transazioni</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="recurring.php" class="nav-link">
+                            <a href="recurring" class="nav-link">
                                 <i class="nav-icon fas fa-redo"></i>
                                 <p>Ricorrenti</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="categories.php" class="nav-link">
+                            <a href="categories" class="nav-link">
                                 <i class="nav-icon fas fa-tags"></i>
                                 <p>Categorie</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="savings.php" class="nav-link">
+                            <a href="savings" class="nav-link">
                                 <i class="nav-icon fas fa-piggy-bank"></i>
                                 <p>Obiettivi di Risparmio</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="reports.php" class="nav-link">
+                            <a href="reports" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>Reportistica</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="advisor.php" class="nav-link">
+                            <a href="advisor" class="nav-link">
                                 <i class="nav-icon fas fa-lightbulb"></i>
                                 <p>Consulente</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="notifications.php" class="nav-link">
+                            <a href="notifications" class="nav-link">
                                 <i class="nav-icon fas fa-bell"></i>
                                 <p>Notifiche</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="settings.php" class="nav-link">
+                            <a href="settings" class="nav-link">
                                 <i class="nav-icon fas fa-cog"></i>
                                 <p>Impostazioni</p>
                             </a>

@@ -2,7 +2,7 @@
 session_start();
 require_once 'inc/config.php';
 if (!isset($_SESSION['user_phone'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 $phone = $_SESSION['user_phone'];
@@ -14,7 +14,7 @@ if (!$stmt->fetch()) {
     $stmt->close();
     session_unset();
     session_destroy();
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 $stmt->close();
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param('isdssssss', $user_id, $description, $amount, $type, $category, $start_date, $end_date, $frequency, $next_occurrence);
     $stmt->execute();
     $stmt->close();
-    header('Location: recurring.php?success=1');
+    header('Location: recurring?success=1');
     exit;
 }
 

@@ -2,7 +2,7 @@
 session_start();
 require_once 'inc/config.php';
 if (!isset($_SESSION['user_phone'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 $phone = $_SESSION['user_phone'];
@@ -14,7 +14,7 @@ if ($stmt->num_rows === 0) {
     $stmt->close();
     session_unset();
     session_destroy();
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 $stmt->close();
@@ -133,7 +133,7 @@ function ajaxSettings(formId, action, successMsg) {
         .then(data => {
             if(data.status==='success') showToast('success', successMsg || data.message);
             else showToast('error', data.message);
-            if(action==='delete_account' && data.status==='success') setTimeout(()=>window.location='login.php',1500);
+            if(action==='delete_account' && data.status==='success') setTimeout(()=>window.location='login',1500);
         })
         .catch(()=>showToast('error','Errore di rete'));
     });

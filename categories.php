@@ -108,7 +108,7 @@ include 'header.php';
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+                    <li class="breadcrumb-item"><a href="index">Home</a></li>
                     <li class="breadcrumb-item active">Categorie</li>
                 </ol>
             </div>
@@ -366,7 +366,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="process_tip.php" method="post">
+            <form action="process_tip" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="add">
                     <div class="form-group">
@@ -414,7 +414,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="process_tip.php" method="post">
+            <form action="process_tip" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" id="edit-tip-id">

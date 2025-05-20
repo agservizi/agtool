@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->num_rows > 0) {
             session_start();
             $_SESSION['user_phone'] = $phone;
-            header('Location: index.php');
+            header('Location: index');
             exit;
         } else {
             $login_error = 'Numero non riconosciuto.';

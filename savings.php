@@ -26,9 +26,9 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $sql = "DELETE FROM savings_goals WHERE id = $id";
     
     if ($conn->query($sql) === TRUE) {
-        header("Location: savings.php?status=success&message=" . urlencode("Obiettivo eliminato con successo"));
+        header("Location: savings?status=success&message=" . urlencode("Obiettivo eliminato con successo"));
     } else {
-        header("Location: savings.php?status=error&message=" . urlencode("Errore nell'eliminazione dell'obiettivo: " . $conn->error));
+        header("Location: savings?status=error&message=" . urlencode("Errore nell'eliminazione dell'obiettivo: " . $conn->error));
     }
     exit;
 }
@@ -41,9 +41,9 @@ if (isset($_POST['update_amount'])) {
     $sql = "UPDATE savings_goals SET current_amount = $amount WHERE id = $id";
     
     if ($conn->query($sql) === TRUE) {
-        header("Location: savings.php?status=success&message=" . urlencode("Importo aggiornato con successo"));
+        header("Location: savings?status=success&message=" . urlencode("Importo aggiornato con successo"));
     } else {
-        header("Location: savings.php?status=error&message=" . urlencode("Errore nell'aggiornamento dell'importo: " . $conn->error));
+        header("Location: savings?status=error&message=" . urlencode("Errore nell'aggiornamento dell'importo: " . $conn->error));
     }
     exit;
 }
@@ -72,15 +72,15 @@ if (isset($_POST['contribute'])) {
                                VALUES ('$description', $amount, 'entrata', 'Risparmio: {$goal['name']}', '$date')";
             
             if ($conn->query($sql_transaction) === TRUE) {
-                header("Location: savings.php?status=success&message=" . urlencode("Contributo aggiunto con successo"));
+                header("Location: savings?status=success&message=" . urlencode("Contributo aggiunto con successo"));
             } else {
-                header("Location: savings.php?status=error&message=" . urlencode("Errore nella registrazione della transazione: " . $conn->error));
+                header("Location: savings?status=error&message=" . urlencode("Errore nella registrazione della transazione: " . $conn->error));
             }
         } else {
-            header("Location: savings.php?status=error&message=" . urlencode("Errore nell'aggiornamento dell'importo: " . $conn->error));
+            header("Location: savings?status=error&message=" . urlencode("Errore nell'aggiornamento dell'importo: " . $conn->error));
         }
     } else {
-        header("Location: savings.php?status=error&message=" . urlencode("Obiettivo non trovato"));
+        header("Location: savings?status=error&message=" . urlencode("Obiettivo non trovato"));
     }
     exit;
 }
@@ -267,7 +267,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="process_goal.php" method="post" id="goal-form">
+            <form action="savings" method="post" id="goal-form">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="goal-name">Nome dell'obiettivo</label>
@@ -365,7 +365,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="savings.php" method="post">
+            <form action="savings" method="post">
                 <input type="hidden" name="contribute" value="1">
                 <input type="hidden" name="goal_id" id="contribute-goal-id">
                 <div class="modal-body">

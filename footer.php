@@ -1,4 +1,4 @@
-                </div><!-- /.container-fluid -->
+</div><!-- /.container-fluid -->
             </section>
             <!-- /.content -->
         </div>
@@ -23,7 +23,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="process_transaction.php" method="post" id="transaction-form">
+                <form action="process_transaction" method="post" id="transaction-form">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="transaction-type">Tipo</label>
