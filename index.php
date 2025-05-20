@@ -170,6 +170,19 @@ $stmt->close();
                                 <p>Consigliere Finanziario</p>
                             </a>
                         </li>
+                        <!-- Nuove voci di menu per Notifiche e Impostazioni -->
+                        <li class="nav-item">
+                            <a href="notifications.php" class="nav-link">
+                                <i class="nav-icon fas fa-bell"></i>
+                                <p>Notifiche</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="settings.php" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>Impostazioni</p>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
