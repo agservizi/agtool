@@ -76,6 +76,25 @@ if ($conn->query($sql) === FALSE) {
     $success[] = "Tabella users creata o già esistente.";
 }
 
+// Crea tabella notifiche
+$sql = "CREATE TABLE IF NOT EXISTS notifications (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
+    type ENUM('email','sms','push') NOT NULL DEFAULT 'email',
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('pending','sent','failed') NOT NULL DEFAULT 'pending',
+    scheduled_at DATETIME,
+    sent_at DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella notifications: " . $conn->error;
+} else {
+    $success[] = "Tabella notifications creata o già esistente.";
+}
+
 // Inserisci utente di default solo se la tabella è vuota
 $check = $conn->query("SELECT COUNT(*) as total FROM users");
 if ($check && ($row = $check->fetch_assoc()) && $row['total'] == 0) {

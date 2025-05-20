@@ -43,6 +43,9 @@ require_once 'inc/config.php';
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
+                    <a href="notifications.php" class="nav-link"><i class="fas fa-bell"></i> Notifiche</a>
+                </li>
+                <li class="nav-item">
                     <a href="logout.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </li>
             </ul>

@@ -33,6 +33,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($stmt->execute()) {
         // Obiettivo salvato con successo
+        // Se è stata inserita una data obiettivo, crea una notifica di promemoria
+        if ($target_date) {
+            // Recupera l'utente attuale dalla sessione
+            session_start();
+            $phone = $_SESSION['user_phone'] ?? null;
+            if ($phone) {
+                $user_stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+                $user_stmt->bind_param('s', $phone);
+                $user_stmt->execute();
+                $user_stmt->bind_result($user_id);
+                if ($user_stmt->fetch()) {
+                    $notif_stmt = $conn->prepare("INSERT INTO notifications (user_id, type, title, message, scheduled_at) VALUES (?, 'email', ?, ?, ?)");
+                    $title = 'Promemoria obiettivo di risparmio';
+                    $msg = "Hai un obiettivo di risparmio ('" . $name . "') in scadenza il " . format_date($target_date) . ".";
+                    $notif_stmt->bind_param('isss', $user_id, $title, $msg, $target_date);
+                    $notif_stmt->execute();
+                    $notif_stmt->close();
+                }
+                $user_stmt->close();
+            }
+        }
+        
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             echo json_encode(['status' => 'success', 'message' => 'Obiettivo di risparmio salvato con successo']);
         } else {

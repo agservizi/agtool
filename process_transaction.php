@@ -41,6 +41,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_stmt->bind_param("di", $amount, $goal_id);
             $update_stmt->execute();
         }
+        // Notifica se la spesa supera un limite
+        if ($type == 'uscita' && $amount >= 500) {
+            session_start();
+            $phone = $_SESSION['user_phone'] ?? null;
+            if ($phone) {
+                $user_stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+                $user_stmt->bind_param('s', $phone);
+                $user_stmt->execute();
+                $user_stmt->bind_result($user_id);
+                if ($user_stmt->fetch()) {
+                    $notif_stmt = $conn->prepare("INSERT INTO notifications (user_id, type, title, message, scheduled_at) VALUES (?, 'email', ?, ?, NOW())");
+                    $title = 'Attenzione: spesa elevata';
+                    $msg = "Hai registrato una spesa di " . format_currency($amount) . ": '" . $description . "'.";
+                    $notif_stmt->bind_param('isss', $user_id, $title, $msg, $date);
+                    $notif_stmt->execute();
+                    $notif_stmt->close();
+                }
+                $user_stmt->close();
+            }
+        }
         
         // Transazione salvata con successo
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
