@@ -64,6 +64,29 @@ if ($conn->query($sql) === FALSE) {
     $success[] = "Tabella financial_tips creata o già esistente.";
 }
 
+// Crea tabella utenti
+$sql = "CREATE TABLE IF NOT EXISTS users (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    phone VARCHAR(20) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella users: " . $conn->error;
+} else {
+    $success[] = "Tabella users creata o già esistente.";
+}
+
+// Inserisci utente di default solo se la tabella è vuota
+$check = $conn->query("SELECT COUNT(*) as total FROM users");
+if ($check && ($row = $check->fetch_assoc()) && $row['total'] == 0) {
+    $sql = "INSERT INTO users (phone) VALUES ('3773798570')";
+    if ($conn->query($sql) === FALSE) {
+        $errors[] = "Errore nell'inserimento dell'utente di default.";
+    } else {
+        $success[] = "Utente di default inserito.";
+    }
+}
+
 ?><!DOCTYPE html>
 <html lang="it">
 <head>

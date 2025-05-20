@@ -1,5 +1,23 @@
 <?php
+session_start();
 require_once 'inc/config.php';
+if (!isset($_SESSION['user_phone'])) {
+    header('Location: login.php');
+    exit;
+}
+$phone = $_SESSION['user_phone'];
+$stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+$stmt->bind_param('s', $phone);
+$stmt->execute();
+$stmt->store_result();
+if ($stmt->num_rows === 0) {
+    $stmt->close();
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+$stmt->close();
 
 // Gestione eliminazione obiettivi
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
