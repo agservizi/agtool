@@ -167,3 +167,48 @@ require_once 'inc/config.php';
             <section class="content">
                 <div class="container-fluid">
                     <!-- Contenuto specifico della pagina viene aggiunto qui -->
+                    <?php
+                    $page = basename($_SERVER['PHP_SELF']);
+                    $showForecast = in_array($page, ['index.php','reports.php','transactions.php','recurring.php','savings.php','notifications.php','categories.php']);
+                    if ($showForecast) {
+                        echo '<div id="forecast-widget" style="max-width:420px;margin:0 auto 1.2em auto;"></div>';
+                        echo "<script>document.addEventListener('DOMContentLoaded',function(){if(typeof showForecastWidget==='function'){showForecastWidget();}});</script>";
+                    }
+                    ?>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+
+        <!-- Main Footer -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-inline">
+                <!-- Versione desktop -->
+                AGTool Finance v1.0
+            </div>
+            <!-- Versione mobile -->
+            <div class="float-right d-sm-none">
+                AGTool Finance
+            </div>
+            <strong>Copyright &copy; 2023 <a href="https://www.agtool.it">AGTool</a>.</strong> Tutti i diritti riservati.
+        </footer>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

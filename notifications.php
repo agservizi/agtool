@@ -17,6 +17,7 @@ if (!$stmt->fetch()) {
     header('Location: login.php');
     exit;
 }
+$_SESSION['user_id'] = $user_id;
 $stmt->close();
 
 // Recupera le notifiche dell'utente

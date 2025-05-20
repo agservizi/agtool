@@ -111,5 +111,28 @@ foreach ($default_tips as $tip) {
     }
 }
 
+// Tabella limiti di spesa per categoria
+$sql = "CREATE TABLE IF NOT EXISTS category_limits (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    monthly_limit DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_limit (user_id, category),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)";
+if ($conn->query($sql) === FALSE) {
+    die("Errore nella creazione della tabella category_limits: " . $conn->error);
+}
+
+// Aggiorna tabella notifications per supportare alert automatici
+$sql = "ALTER TABLE notifications 
+    ADD COLUMN type VARCHAR(30) DEFAULT 'manual',
+    ADD COLUMN is_read TINYINT(1) DEFAULT 0,
+    ADD COLUMN related_category VARCHAR(100) DEFAULT NULL
+";
+// Ignora errore se colonne già esistono
+$conn->query($sql);
+
 echo "Installazione del database completata con successo!";
 ?>
