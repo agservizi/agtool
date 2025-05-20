@@ -106,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-form {
             width: 100%;
             max-width: 320px;
+            box-sizing: border-box;
         }
         .login-title {
             font-size: 1.5rem;
@@ -138,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1.1rem;
             background: #f8f8f8;
             transition: border-color 0.2s;
+            box-sizing: border-box;
         }
         .form-control:focus {
             border-color: #28a745;
@@ -183,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         @media (max-width: 600px) {
             .login-container { box-shadow: none; border-radius: 0; }
             .login-left, .login-right { padding: 1.2rem 0.5rem; }
+            .login-form { max-width: 100%; }
         }
     </style>
 </head>
