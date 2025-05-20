@@ -131,12 +131,23 @@ if ($conn->query($sql) === FALSE) {
 }
 
 // Aggiorna tabella notifications per supportare alert automatici
-$sql = "ALTER TABLE notifications 
-    ADD COLUMN type VARCHAR(30) DEFAULT 'manual',
-    ADD COLUMN is_read TINYINT(1) DEFAULT 0,
-    ADD COLUMN related_category VARCHAR(100) DEFAULT NULL
-";
-$conn->query($sql);
+// Aggiungi colonne solo se non esistono già
+$columns = [];
+$res = $conn->query("SHOW COLUMNS FROM notifications");
+if ($res) {
+    while($row = $res->fetch_assoc()) {
+        $columns[] = $row['Field'];
+    }
+}
+if (!in_array('type', $columns)) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN type VARCHAR(30) DEFAULT 'manual'");
+}
+if (!in_array('is_read', $columns)) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN is_read TINYINT(1) DEFAULT 0");
+}
+if (!in_array('related_category', $columns)) {
+    $conn->query("ALTER TABLE notifications ADD COLUMN related_category VARCHAR(100) DEFAULT NULL");
+}
 
 // Inserisci utente di default solo se la tabella è vuota
 $check = $conn->query("SELECT COUNT(*) as total FROM users");
