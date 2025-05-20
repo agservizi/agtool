@@ -35,76 +35,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #28a745 0%, #1abc9c 100%);
+            background: linear-gradient(120deg, #232526 0%, #1abc9c 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Source Sans Pro', Arial, sans-serif;
-            animation: fadeInBg 1s;
+            margin: 0;
         }
-        @keyframes fadeInBg {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .login-card {
-            background: #fff;
-            border-radius: 18px;
+        .login-glass {
+            background: rgba(255,255,255,0.13);
+            border-radius: 22px;
             box-shadow: 0 8px 32px 0 rgba(44, 62, 80, 0.18);
-            padding: 2.5rem 2.5rem 2rem 2.5rem;
-            min-width: 340px;
-            max-width: 370px;
+            border: 1.5px solid rgba(255,255,255,0.18);
+            padding: 2.7rem 2.5rem 2.2rem 2.5rem;
+            min-width: 350px;
+            max-width: 400px;
             width: 100%;
             text-align: center;
             position: relative;
-            animation: fadeIn 0.7s;
+            backdrop-filter: blur(7px);
+            animation: fadeIn 0.8s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .login-logo {
-            font-size: 2.7rem;
-            color: #28a745;
-            margin-bottom: 0.5rem;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #28a745 60%, #1abc9c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.1rem auto;
+            box-shadow: 0 2px 12px #28a74533;
+        }
+        .login-logo i {
+            color: #fff;
+            font-size: 2.2rem;
         }
         .login-title {
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: #222;
-            margin-bottom: 0.7rem;
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: #232526;
+            margin-bottom: 0.5rem;
             letter-spacing: 1px;
         }
         .login-subtitle {
-            color: #888;
-            font-size: 1.05rem;
-            margin-bottom: 1.5rem;
+            color: #444;
+            font-size: 1.08rem;
+            margin-bottom: 1.7rem;
+            font-weight: 500;
         }
         .form-group {
-            margin-bottom: 1.3rem;
+            margin-bottom: 1.5rem;
             text-align: left;
         }
         .form-group label {
             font-weight: 600;
-            color: #222;
+            color: #232526;
             margin-bottom: 0.3rem;
             display: block;
+            font-size: 1.08rem;
         }
         .form-control {
             width: 100%;
-            padding: 0.7rem 1rem;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            font-size: 1.1rem;
-            transition: border-color 0.2s;
+            padding: 0.8rem 1.1rem;
+            border-radius: 10px;
+            border: 1.5px solid #e0e0e0;
+            font-size: 1.13rem;
+            background: rgba(255,255,255,0.7);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-control:focus {
-            border-color: #28a745;
+            border-color: #1abc9c;
             outline: none;
+            box-shadow: 0 0 0 2px #1abc9c33;
         }
         .btn-login {
             width: 100%;
-            padding: 0.7rem;
+            padding: 0.8rem;
             background: linear-gradient(90deg, #28a745 60%, #1abc9c 100%);
             color: #fff;
             border: none;
-            border-radius: 8px;
-            font-size: 1.15rem;
+            border-radius: 10px;
+            font-size: 1.18rem;
             font-weight: 700;
             letter-spacing: 1px;
             box-shadow: 0 2px 8px #28a74522;
@@ -118,24 +134,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-error {
             color: #e74c3c;
             background: #fdecea;
-            border-radius: 6px;
-            padding: 0.7rem 1rem;
-            margin-bottom: 1rem;
-            font-size: 1rem;
+            border-radius: 7px;
+            padding: 0.8rem 1.1rem;
+            margin-bottom: 1.1rem;
+            font-size: 1.08rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
+            border: 1px solid #e74c3c22;
         }
         .login-error i {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
         @media (max-width: 480px) {
-            .login-card { padding: 1.2rem 0.5rem; min-width: 0; }
+            .login-glass { padding: 1.2rem 0.5rem; min-width: 0; }
         }
     </style>
 </head>
 <body>
-    <form method="post" class="login-card">
+    <form method="post" class="login-glass">
         <div class="login-logo">
             <i class="fas fa-wallet"></i>
         </div>
@@ -146,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         <div class="form-group">
             <label for="phone"><i class="fas fa-mobile-alt"></i> Numero di cellulare</label>
-            <input type="text" name="phone" id="phone" class="form-control" placeholder="3773798570" required autofocus>
+            <input type="text" name="phone" id="phone" class="form-control" required autofocus autocomplete="tel">
         </div>
         <button type="submit" class="btn-login">Accedi</button>
     </form>
