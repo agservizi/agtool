@@ -66,15 +66,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             echo json_encode(['status' => 'success', 'message' => 'Transazione salvata con successo']);
         } else {
-            header("Location: index.php?status=success&message=" . urlencode('Transazione salvata con successo'));
+            header('Location: transactions.php?success=1');
         }
+        exit;
     } else {
         // Errore nel salvataggio della transazione
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-            echo json_encode(['status' => 'error', 'message' => 'Errore nel salvataggio della transazione: ' . $stmt->error]);
+            echo json_encode(['status' => 'error', 'message' => 'Errore nel salvataggio della transazione']);
         } else {
-            header("Location: index.php?status=error&message=" . urlencode('Errore nel salvataggio della transazione: ' . $stmt->error));
+            header('Location: transactions.php?error=1');
         }
+        exit;
     }
     
     $stmt->close();

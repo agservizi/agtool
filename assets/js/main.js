@@ -414,9 +414,9 @@ function initCharts() {
     if (incomeExpenseChart) {
         // Ottieni i dati per il grafico
         fetch('get_chart_data.php?type=income_expense')
-        .then(response => response.json())
-        .then(data => {
-            const chart = new Chart(incomeExpenseChart, {
+        .then((response) => response.json())
+        .then((data) => {
+            new Chart(incomeExpenseChart, {
                 type: 'line',
                 data: {
                     labels: data.labels,
@@ -530,6 +530,23 @@ function showAlert(type, message) {
 }
 
 /**
+ * Mostra un toast di successo, errore o info
+ */
+function showToast(type, message) {
+    // Rimuovi eventuali toast precedenti
+    const old = document.getElementById('agtool-toast');
+    if (old) old.remove();
+    // Crea il toast
+    const toast = document.createElement('div');
+    toast.id = 'agtool-toast';
+    toast.className = 'agtool-toast agtool-toast-' + type;
+    toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : (type === 'error' ? 'times-circle' : 'info-circle')}"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.classList.add('show'); }, 10);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
+}
+
+/**
  * Formatta un numero come valuta
  */
 function formatCurrency(value) {
@@ -537,4 +554,21 @@ function formatCurrency(value) {
         style: 'currency',
         currency: 'EUR'
     }).format(value);
+}
+
+/**
+ * Richiama via AJAX la generazione delle ricorrenze
+ */
+function runRecurringAjax() {
+    fetch('recurring.php?action=run_recurring')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                showToast('success', 'Transazioni ricorrenti generate: ' + data.generated);
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showToast('error', 'Errore nella generazione delle ricorrenze');
+            }
+        })
+        .catch(() => showToast('error', 'Errore di connessione con il server'));
 }

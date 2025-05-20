@@ -103,6 +103,38 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Toast AGTool */
+.agtool-toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 9999;
+    min-width: 260px;
+    max-width: 350px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(44,62,80,0.13);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-30px);
+    transition: opacity 0.3s, transform 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+}
+.agtool-toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.agtool-toast-success { background: #28a745; }
+.agtool-toast-error { background: #e74c3c; }
+.agtool-toast-info { background: #3498db; }
+.agtool-toast i { font-size: 1.3em; }
+
 /* Responsive */
 @media (max-width: 767.98px) {
     .small-box {

@@ -123,6 +123,12 @@ require_once 'inc/config.php';
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="recurring.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'recurring.php' ? 'active' : ''; ?>">
+                                <i class="nav-icon fas fa-redo"></i>
+                                <p>Ricorrenti</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="categories.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : ''; ?>">
                                 <i class="nav-icon fas fa-tags"></i>
                                 <p>Categorie</p>

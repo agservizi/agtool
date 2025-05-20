@@ -56,17 +56,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-            echo json_encode(['status' => 'success', 'message' => 'Obiettivo di risparmio salvato con successo']);
+            echo json_encode(['status' => 'success', 'message' => 'Obiettivo salvato con successo']);
         } else {
-            header("Location: index.php?status=success&message=" . urlencode('Obiettivo di risparmio salvato con successo'));
+            header('Location: savings.php?success=1');
         }
+        exit;
     } else {
-        // Errore nel salvataggio dell'obiettivo
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
-            echo json_encode(['status' => 'error', 'message' => 'Errore nel salvataggio dell\'obiettivo: ' . $stmt->error]);
+            echo json_encode(['status' => 'error', 'message' => 'Errore nel salvataggio dell\'obiettivo']);
         } else {
-            header("Location: index.php?status=error&message=" . urlencode('Errore nel salvataggio dell\'obiettivo: ' . $stmt->error));
+            header('Location: savings.php?error=1');
         }
+        exit;
     }
     
     $stmt->close();

@@ -56,4 +56,10 @@ include 'header.php';
         </div>
     </div>
 </div>
+<?php if (isset($_GET['success'])): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){showToast('success','Operazione sulle notifiche completata!');});</script>
+<?php endif; ?>
+<?php if (isset($_GET['error'])): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){showToast('error','Errore nell\'operazione sulle notifiche!');});</script>
+<?php endif; ?>
 <?php include 'footer.php'; ?>

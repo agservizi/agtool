@@ -95,6 +95,27 @@ if ($conn->query($sql) === FALSE) {
     $success[] = "Tabella notifications creata o già esistente.";
 }
 
+// Crea tabella transazioni ricorrenti
+$sql = "CREATE TABLE IF NOT EXISTS recurring_transactions (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    type ENUM('entrata', 'uscita') NOT NULL,
+    category VARCHAR(100),
+    start_date DATE NOT NULL,
+    end_date DATE DEFAULT NULL,
+    frequency ENUM('daily','weekly','monthly','yearly') NOT NULL,
+    next_occurrence DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella recurring_transactions: " . $conn->error;
+} else {
+    $success[] = "Tabella recurring_transactions creata o già esistente.";
+}
+
 // Inserisci utente di default solo se la tabella è vuota
 $check = $conn->query("SELECT COUNT(*) as total FROM users");
 if ($check && ($row = $check->fetch_assoc()) && $row['total'] == 0) {

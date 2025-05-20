@@ -276,4 +276,11 @@ include 'header.php';
     </div>
 </div>
 
+<?php if (isset($_GET['success'])): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){showToast('success','Transazione salvata con successo!');});</script>
+<?php endif; ?>
+<?php if (isset($_GET['error'])): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){showToast('error','Errore nel salvataggio della transazione!');});</script>
+<?php endif; ?>
+
 <?php include 'footer.php'; ?>

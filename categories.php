@@ -496,4 +496,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<?php if (isset($_GET['success'])): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){showToast('success','Operazione sulle categorie completata!');});</script>
+<?php endif; ?>
+<?php if (isset($_GET['error'])): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){showToast('error','Errore nell\'operazione sulle categorie!');});</script>
+<?php endif; ?>
+
 <?php include 'footer.php'; ?>
