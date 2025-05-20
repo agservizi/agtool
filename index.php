@@ -60,6 +60,12 @@ $stmt->close();
                     <a href="#" class="nav-link" data-toggle="modal" data-target="#addTransactionModal">Nuova Transazione</a>
                 </li>
             </ul>
+            <!-- Pulsante Logout a destra -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a href="logout.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
         </nav>
         <!-- /.navbar -->
 
