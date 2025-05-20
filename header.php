@@ -167,14 +167,6 @@ require_once 'inc/config.php';
             <section class="content">
                 <div class="container-fluid">
                     <!-- Contenuto specifico della pagina viene aggiunto qui -->
-                    <?php
-                    $page = basename($_SERVER['PHP_SELF']);
-                    $showForecast = in_array($page, ['index.php','reports.php','transactions.php','recurring.php','savings.php','notifications.php','categories.php']);
-                    if ($showForecast) {
-                        echo '<div id="forecast-widget" style="max-width:420px;margin:0 auto 1.2em auto;"></div>';
-                        echo "<script>document.addEventListener('DOMContentLoaded',function(){if(typeof showForecastWidget==='function'){showForecastWidget();}});</script>";
-                    }
-                    ?>
                 </div>
             </section>
             <!-- /.content -->
