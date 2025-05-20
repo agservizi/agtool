@@ -1,0 +1,94 @@
+<?php
+// install.php - Installazione database AGTool Finance
+require_once 'inc/config.php';
+
+$errors = [];
+$success = [];
+
+// Crea tabella transazioni
+$sql = "CREATE TABLE IF NOT EXISTS transactions (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    description VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    type ENUM('entrata', 'uscita') NOT NULL,
+    category VARCHAR(100),
+    date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella transactions: " . $conn->error;
+} else {
+    $success[] = "Tabella transactions creata o già esistente.";
+}
+
+// Crea tabella categorie
+$sql = "CREATE TABLE IF NOT EXISTS categories (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    type ENUM('entrata', 'uscita') NOT NULL,
+    color VARCHAR(20) DEFAULT '#3498db',
+    UNIQUE KEY unique_cat (name, type)
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella categories: " . $conn->error;
+} else {
+    $success[] = "Tabella categories creata o già esistente.";
+}
+
+// Crea tabella obiettivi di risparmio
+$sql = "CREATE TABLE IF NOT EXISTS savings_goals (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    target_amount DECIMAL(10,2) NOT NULL,
+    current_amount DECIMAL(10,2) DEFAULT 0,
+    target_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella savings_goals: " . $conn->error;
+} else {
+    $success[] = "Tabella savings_goals creata o già esistente.";
+}
+
+// Crea tabella consigli finanziari
+$sql = "CREATE TABLE IF NOT EXISTS financial_tips (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    is_active TINYINT(1) DEFAULT 1
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella financial_tips: " . $conn->error;
+} else {
+    $success[] = "Tabella financial_tips creata o già esistente.";
+}
+
+?><!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Installazione AGTool Finance</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body style="font-family: sans-serif; max-width: 600px; margin: 40px auto;">
+    <h1>Installazione Database AGTool Finance</h1>
+    <?php if ($errors): ?>
+        <div style="color: red;">
+            <h3>Si sono verificati errori:</h3>
+            <ul>
+                <?php foreach ($errors as $err) echo "<li>$err</li>"; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+    <?php if ($success): ?>
+        <div style="color: green;">
+            <h3>Operazione completata:</h3>
+            <ul>
+                <?php foreach ($success as $msg) echo "<li>$msg</li>"; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+    <p><a href="index.php">Vai alla Dashboard</a></p>
+</body>
+</html>

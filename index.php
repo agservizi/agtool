@@ -198,27 +198,20 @@
                                             </thead>
                                             <tbody>
                                                 <?php
-                                                // Ottieni le transazioni recenti
-                                                $sql = "SELECT t.*, c.name as category_name, c.color 
-                                                        FROM transactions t
-                                                        LEFT JOIN categories c ON t.category = c.name AND t.type = c.type
-                                                        ORDER BY t.date DESC
-                                                        LIMIT 10";
-                                                
+                                                $sql = "SELECT t.*, c.name as category_name, c.color FROM transactions t LEFT JOIN categories c ON t.category = c.name AND t.type = c.type ORDER BY t.date DESC LIMIT 10";
                                                 $result = $conn->query($sql);
-                                                
-                                                if ($result->num_rows > 0) {
+                                                if ($result && $result->num_rows > 0) {
                                                     while($row = $result->fetch_assoc()) {
                                                         $color_class = ($row['type'] == 'entrata') ? 'text-success' : 'text-danger';
                                                         $amount_sign = ($row['type'] == 'entrata') ? '+' : '-';
                                                         $amount = $amount_sign . ' ' . format_currency($row['amount']);
                                                         $date = format_date($row['date']);
                                                         $category_color = $row['color'] ?? '#3498db';
-                                                        
+                                                        $category_name = $row['category_name'] ?? $row['category'];
                                                         echo "<tr>";
                                                         echo "<td>{$date}</td>";
                                                         echo "<td>{$row['description']}</td>";
-                                                        echo "<td><span class='badge' style='background-color: {$category_color}'>{$row['category_name']}</span></td>";
+                                                        echo "<td><span class='badge' style='background-color: {$category_color}'>{$category_name}</span></td>";
                                                         echo "<td class='{$color_class}'>{$amount}</td>";
                                                         echo "</tr>";
                                                     }
@@ -252,11 +245,9 @@
                                             </div>
                                             <div class="direct-chat-text">
                                                 <?php
-                                                // Ottieni un consiglio casuale
                                                 $sql = "SELECT * FROM financial_tips WHERE is_active = 1 ORDER BY RAND() LIMIT 1";
                                                 $result = $conn->query($sql);
-                                                
-                                                if ($result->num_rows > 0) {
+                                                if ($result && $result->num_rows > 0) {
                                                     $tip = $result->fetch_assoc();
                                                     echo "<strong>{$tip['title']}</strong><br>";
                                                     echo $tip['description'];
@@ -306,11 +297,9 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <?php
-                                    // Ottieni gli obiettivi di risparmio
                                     $sql = "SELECT * FROM savings_goals ORDER BY target_date ASC";
                                     $result = $conn->query($sql);
-                                    
-                                    if ($result->num_rows > 0) {
+                                    if ($result && $result->num_rows > 0) {
                                         while($row = $result->fetch_assoc()) {
                                             $percentage = ($row['target_amount'] > 0) ? ($row['current_amount'] / $row['target_amount']) * 100 : 0;
                                             $percentage = min(100, $percentage);
