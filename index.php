@@ -141,6 +141,12 @@ $stmt->close();
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="recurring.php" class="nav-link">
+                                <i class="nav-icon fas fa-redo"></i>
+                                <p>Ricorrenti</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="categories.php" class="nav-link">
                                 <i class="nav-icon fas fa-tags"></i>
                                 <p>Categorie</p>
