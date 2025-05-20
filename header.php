@@ -152,6 +152,24 @@ require_once 'inc/config.php';
                                 <p>Consigliere Finanziario</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="notifications.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'notifications.php' ? 'active' : ''; ?>">
+                                <i class="nav-icon fas fa-bell"></i>
+                                <p>Notifiche</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="settings.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'settings.php' ? 'active' : ''; ?>">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>Impostazioni</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="logout.php" class="nav-link text-danger">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <p>Logout</p>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
