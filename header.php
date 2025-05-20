@@ -42,9 +42,54 @@ require_once 'inc/config.php';
 
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a href="notifications.php" class="nav-link"><i class="fas fa-bell"></i> Notifiche</a>
+                <?php
+                // Mostra la campanella solo se l'utente è loggato
+                if (isset($_SESSION['user_phone'])) {
+                    $phone = $_SESSION['user_phone'];
+                    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+                    $stmt->bind_param('s', $phone);
+                    $stmt->execute();
+                    $stmt->bind_result($user_id);
+                    $stmt->fetch();
+                    $stmt->close();
+                    // Prendi le ultime 5 notifiche
+                    $notif_stmt = $conn->prepare("SELECT title, message, status, scheduled_at FROM notifications WHERE user_id = ? ORDER BY scheduled_at DESC, created_at DESC LIMIT 5");
+                    $notif_stmt->bind_param('i', $user_id);
+                    $notif_stmt->execute();
+                    $notif_result = $notif_stmt->get_result();
+                    $unread_count = 0;
+                    $notifiche = [];
+                    while($row = $notif_result->fetch_assoc()) {
+                        if ($row['status'] === 'pending') $unread_count++;
+                        $notifiche[] = $row;
+                    }
+                    $notif_stmt->close();
+                ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#" aria-label="Notifiche">
+                        <i class="fas fa-bell"></i>
+                        <?php if ($unread_count > 0): ?>
+                            <span class="badge badge-warning navbar-badge"><?php echo $unread_count; ?></span>
+                        <?php endif; ?>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right p-0" style="min-width:320px;max-width:350px;">
+                        <span class="dropdown-header"><?php echo $unread_count > 0 ? $unread_count.' nuove notifiche' : 'Nessuna nuova notifica'; ?></span>
+                        <div class="dropdown-divider"></div>
+                        <?php if (count($notifiche) > 0): foreach($notifiche as $n): ?>
+                            <a href="notifications.php" class="dropdown-item">
+                                <i class="fas fa-info-circle mr-2"></i> <strong><?php echo htmlspecialchars($n['title']); ?></strong><br>
+                                <span style="font-size:0.95em;color:#666;"><?php echo htmlspecialchars($n['message']); ?></span>
+                                <span class="float-right text-muted text-sm"><?php echo $n['scheduled_at'] ? date('d/m/Y', strtotime($n['scheduled_at'])) : ''; ?></span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        <?php endforeach; else: ?>
+                            <span class="dropdown-item text-center text-muted">Nessuna notifica recente</span>
+                            <div class="dropdown-divider"></div>
+                        <?php endif; ?>
+                        <a href="notifications.php" class="dropdown-item dropdown-footer">Vedi tutte le notifiche</a>
+                    </div>
                 </li>
+                <?php } ?>
                 <li class="nav-item">
                     <a href="logout.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </li>
