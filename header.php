@@ -111,63 +111,57 @@ require_once 'inc/config.php';
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a href="index.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <a href="index.php" class="nav-link">
+                                <i class="nav-icon fas fa-home"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="transactions.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'transactions.php' ? 'active' : ''; ?>">
+                            <a href="transactions.php" class="nav-link">
                                 <i class="nav-icon fas fa-exchange-alt"></i>
                                 <p>Transazioni</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="recurring.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'recurring.php' ? 'active' : ''; ?>">
+                            <a href="recurring.php" class="nav-link">
                                 <i class="nav-icon fas fa-redo"></i>
                                 <p>Ricorrenti</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="categories.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : ''; ?>">
+                            <a href="categories.php" class="nav-link">
                                 <i class="nav-icon fas fa-tags"></i>
                                 <p>Categorie</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="savings.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'savings.php' ? 'active' : ''; ?>">
+                            <a href="savings.php" class="nav-link">
                                 <i class="nav-icon fas fa-piggy-bank"></i>
                                 <p>Obiettivi di Risparmio</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="reports.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'active' : ''; ?>">
+                            <a href="reports.php" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>Reportistica</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="advisor.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'advisor.php' ? 'active' : ''; ?>">
+                            <a href="advisor.php" class="nav-link">
                                 <i class="nav-icon fas fa-lightbulb"></i>
-                                <p>Consigliere Finanziario</p>
+                                <p>Consulente</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="notifications.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'notifications.php' ? 'active' : ''; ?>">
+                            <a href="notifications.php" class="nav-link">
                                 <i class="nav-icon fas fa-bell"></i>
                                 <p>Notifiche</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="settings.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'settings.php' ? 'active' : ''; ?>">
+                            <a href="settings.php" class="nav-link">
                                 <i class="nav-icon fas fa-cog"></i>
                                 <p>Impostazioni</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="logout.php" class="nav-link text-danger">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <p>Logout</p>
                             </a>
                         </li>
                     </ul>

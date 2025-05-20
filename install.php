@@ -68,6 +68,8 @@ if ($conn->query($sql) === FALSE) {
 $sql = "CREATE TABLE IF NOT EXISTS users (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     phone VARCHAR(20) NOT NULL UNIQUE,
+    email VARCHAR(100) DEFAULT NULL,
+    monthly_limit DECIMAL(10,2) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 if ($conn->query($sql) === FALSE) {
@@ -114,6 +116,30 @@ if ($conn->query($sql) === FALSE) {
     $errors[] = "Errore nella creazione della tabella recurring_transactions: " . $conn->error;
 } else {
     $success[] = "Tabella recurring_transactions creata o già esistente.";
+}
+
+// Aggiorna tabella users con email e monthly_limit
+$sql = "ALTER TABLE users ADD COLUMN email VARCHAR(100) DEFAULT NULL";
+@$conn->query($sql);
+$sql = "ALTER TABLE users ADD COLUMN monthly_limit DECIMAL(10,2) DEFAULT NULL";
+@$conn->query($sql);
+
+// Crea tabella user_settings per preferenze e notifiche
+$sql = "CREATE TABLE IF NOT EXISTS user_settings (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
+    theme VARCHAR(20) DEFAULT 'light',
+    language VARCHAR(10) DEFAULT 'it',
+    email_notifications TINYINT(1) DEFAULT 1,
+    sms_notifications TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)";
+if ($conn->query($sql) === FALSE) {
+    $errors[] = "Errore nella creazione della tabella user_settings: " . $conn->error;
+} else {
+    $success[] = "Tabella user_settings creata o già esistente.";
 }
 
 // Inserisci utente di default solo se la tabella è vuota
