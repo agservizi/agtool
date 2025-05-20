@@ -8,22 +8,13 @@ define('DB_USER', 'u427445037_agtool');
 define('DB_PASS', 'Giogiu2123@');
 define('DB_NAME', 'u427445037_agtool');
 
-// Connessione al database
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, '', DB_PORT);
+// Connessione diretta al database specificato
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
 // Verifica la connessione
 if ($conn->connect_error) {
-    die("Connessione fallita: " . $conn->connect_error);
+    die("Connessione al database fallita: " . $conn->connect_error);
 }
-
-// Crea il database se non esiste
-$sql = "CREATE DATABASE IF NOT EXISTS " . DB_NAME;
-if ($conn->query($sql) === FALSE) {
-    die("Errore nella creazione del database: " . $conn->error);
-}
-
-// Seleziona il database
-$conn->select_db(DB_NAME);
 
 // Funzione per proteggere i dati inseriti
 function clean_input($data) {
