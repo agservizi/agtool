@@ -118,105 +118,67 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Small boxes (Stat box) -->
+                    <!-- Statistiche principali -->
                     <div class="row">
                         <div class="col-lg-3 col-6">
-                            <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">
                                     <?php
                                     require_once 'inc/config.php';
                                     
-                                    // Calcolo del bilancio totale
-                                    $sql_income = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE type = 'entrata'";
-                                    $sql_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE type = 'uscita'";
-                                    
-                                    $result_income = $conn->query($sql_income);
-                                    $result_expense = $conn->query($sql_expense);
-                                    
-                                    $income = $result_income->fetch_assoc()['total'];
-                                    $expense = $result_expense->fetch_assoc()['total'];
+                                    // Bilancio totale
+                                    $income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata'")->fetch_assoc()['total'];
+                                    $expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita'")->fetch_assoc()['total'];
                                     $balance = $income - $expense;
                                     ?>
                                     <h3><?php echo format_currency($balance); ?></h3>
                                     <p>Bilancio Totale</p>
                                 </div>
-                                <div class="icon">
-                                    <i class="fas fa-wallet"></i>
-                                </div>
+                                <div class="icon"><i class="fas fa-wallet"></i></div>
                                 <a href="transactions.php" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
-                        <!-- ./col -->
                         <div class="col-lg-3 col-6">
-                            <!-- small box -->
                             <div class="small-box bg-success">
                                 <div class="inner">
                                     <h3><?php echo format_currency($income); ?></h3>
                                     <p>Entrate Totali</p>
                                 </div>
-                                <div class="icon">
-                                    <i class="fas fa-arrow-up"></i>
-                                </div>
+                                <div class="icon"><i class="fas fa-arrow-up"></i></div>
                                 <a href="transactions.php?type=entrata" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
-                        <!-- ./col -->
                         <div class="col-lg-3 col-6">
-                            <!-- small box -->
                             <div class="small-box bg-danger">
                                 <div class="inner">
                                     <h3><?php echo format_currency($expense); ?></h3>
                                     <p>Uscite Totali</p>
                                 </div>
-                                <div class="icon">
-                                    <i class="fas fa-arrow-down"></i>
-                                </div>
+                                <div class="icon"><i class="fas fa-arrow-down"></i></div>
                                 <a href="transactions.php?type=uscita" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
-                        <!-- ./col -->
                         <div class="col-lg-3 col-6">
-                            <!-- small box -->
                             <div class="small-box bg-warning">
                                 <div class="inner">
                                     <?php
-                                    // Calcolo del risparmio mensile
-                                    $current_month = date('m');
-                                    $current_year = date('Y');
-                                    
-                                    $sql_monthly_income = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
-                                                         WHERE type = 'entrata' 
-                                                         AND MONTH(date) = $current_month 
-                                                         AND YEAR(date) = $current_year";
-                                    $sql_monthly_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
-                                                          WHERE type = 'uscita' 
-                                                          AND MONTH(date) = $current_month 
-                                                          AND YEAR(date) = $current_year";
-                                    
-                                    $result_monthly_income = $conn->query($sql_monthly_income);
-                                    $result_monthly_expense = $conn->query($sql_monthly_expense);
-                                    
-                                    $monthly_income = $result_monthly_income->fetch_assoc()['total'];
-                                    $monthly_expense = $result_monthly_expense->fetch_assoc()['total'];
+                                    $m = date('m'); $y = date('Y');
+                                    $monthly_income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
+                                    $monthly_expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
                                     $monthly_savings = $monthly_income - $monthly_expense;
                                     ?>
                                     <h3><?php echo format_currency($monthly_savings); ?></h3>
                                     <p>Risparmio del Mese</p>
                                 </div>
-                                <div class="icon">
-                                    <i class="fas fa-piggy-bank"></i>
-                                </div>
+                                <div class="icon"><i class="fas fa-piggy-bank"></i></div>
                                 <a href="reports.php?view=monthly" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
-                        <!-- ./col -->
                     </div>
                     <!-- /.row -->
 
-                    <!-- Main row -->
                     <div class="row">
-                        <!-- Left col -->
+                        <!-- Colonna sinistra -->
                         <section class="col-lg-7 connectedSortable">
                             <!-- Transazioni recenti -->
                             <div class="card">
@@ -317,9 +279,7 @@
                             </div>
                             <!-- /.card -->
                         </section>
-                        <!-- /.Left col -->
-
-                        <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                        <!-- Colonna destra -->
                         <section class="col-lg-5 connectedSortable">
                             <!-- Grafico Entrate vs Uscite -->
                             <div class="card">
@@ -362,8 +322,7 @@
                                             <span><?php echo format_currency($row['current_amount']); ?> / <?php echo format_currency($row['target_amount']); ?></span>
                                         </div>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $percentage; ?>%" 
-                                                aria-valuenow="<?php echo $percentage; ?>" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $percentage; ?>%" aria-valuenow="<?php echo $percentage; ?>" aria-valuemin="0" aria-valuemax="100">
                                                 <?php echo round($percentage, 1); ?>%
                                             </div>
                                         </div>
@@ -422,9 +381,7 @@
                             </div>
                             <!-- /.card -->
                         </section>
-                        <!-- right col -->
                     </div>
-                    <!-- /.row (main row) -->
                 </div><!-- /.container-fluid -->
             </section>
             <!-- /.content -->
