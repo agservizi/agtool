@@ -118,12 +118,6 @@ if ($conn->query($sql) === FALSE) {
     $success[] = "Tabella recurring_transactions creata o già esistente.";
 }
 
-// Aggiorna tabella users con email e monthly_limit
-$sql = "ALTER TABLE users ADD COLUMN email VARCHAR(100) DEFAULT NULL";
-@$conn->query($sql);
-$sql = "ALTER TABLE users ADD COLUMN monthly_limit DECIMAL(10,2) DEFAULT NULL";
-@$conn->query($sql);
-
 // Crea tabella user_settings per preferenze e notifiche
 $sql = "CREATE TABLE IF NOT EXISTS user_settings (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
