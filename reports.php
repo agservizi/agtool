@@ -46,28 +46,61 @@ if (isset($_GET['export'])) {
         }
     }
     if ($export_type == 'csv') {
+        $file_name = "report-".date('Ymd-His').".csv";
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="report.csv"');
+        header('Content-Disposition: attachment; filename="'.$file_name.'"');
         $out = fopen('php://output', 'w');
         fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo']);
         foreach ($rows as $r) {
             fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']]);
         }
         fclose($out);
+        // Salva il report esportato nella tabella exported_reports
+        function save_exported_report($conn, $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url) {
+            $stmt = $conn->prepare("INSERT INTO exported_reports (user_id, export_type, export_view, export_month, export_year, export_category, file_name, file_path, download_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param('issiiisss', $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
+            $stmt->execute();
+            $stmt->close();
+        }
+        // Trova user_id
+        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+        $stmt->bind_param('s', $phone);
+        $stmt->execute();
+        $stmt->bind_result($user_id);
+        $stmt->fetch();
+        $stmt->close();
+        save_exported_report($conn, $user_id, 'csv', $export_view, $export_month, $export_year, $export_category, $file_name, '', '');
         exit;
     }
     if ($export_type == 'excel') {
+        $file_name = "report-".date('Ymd-His').".xls";
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="report.xls"');
+        header('Content-Disposition: attachment; filename="'.$file_name.'"');
         $out = fopen('php://output', 'w');
         fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo'], "\t");
         foreach ($rows as $r) {
             fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']], "\t");
         }
         fclose($out);
+        // Salva il report esportato nella tabella exported_reports
+        function save_exported_report($conn, $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url) {
+            $stmt = $conn->prepare("INSERT INTO exported_reports (user_id, export_type, export_view, export_month, export_year, export_category, file_name, file_path, download_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param('issiiisss', $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
+            $stmt->execute();
+            $stmt->close();
+        }
+        // Trova user_id
+        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+        $stmt->bind_param('s', $phone);
+        $stmt->execute();
+        $stmt->bind_result($user_id);
+        $stmt->fetch();
+        $stmt->close();
+        save_exported_report($conn, $user_id, 'excel', $export_view, $export_month, $export_year, $export_category, $file_name, '', '');
         exit;
     }
     if ($export_type == 'pdf') {
+        $file_name = "report-".date('Ymd-His').".pdf";
         require_once __DIR__ . '/vendor/autoload.php';
         if (!class_exists('FPDF')) {
             echo '<div class="alert alert-danger">Libreria FPDF non installata. Installa con composer require setasign/fpdf</div>';
@@ -159,7 +192,22 @@ if (isset($_GET['export'])) {
         $pdf->SetTextColor($saldo >= 0 ? 40 : 220, $saldo >= 0 ? 167 : 53, $saldo >= 0 ? 69 : 69);
         $pdf->Cell(40,10,number_format($saldo,2,',','.'),1,1,'R',true);
         $pdf->SetTextColor(0,0,0);
-        $pdf->Output('D','report.pdf');
+        $pdf->Output('D',$file_name);
+        // Salva il report esportato nella tabella exported_reports
+        function save_exported_report($conn, $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url) {
+            $stmt = $conn->prepare("INSERT INTO exported_reports (user_id, export_type, export_view, export_month, export_year, export_category, file_name, file_path, download_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param('issiiisss', $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
+            $stmt->execute();
+            $stmt->close();
+        }
+        // Trova user_id
+        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+        $stmt->bind_param('s', $phone);
+        $stmt->execute();
+        $stmt->bind_result($user_id);
+        $stmt->fetch();
+        $stmt->close();
+        save_exported_report($conn, $user_id, 'pdf', $export_view, $export_month, $export_year, $export_category, $file_name, '', '');
         exit;
     }
 }
@@ -210,6 +258,76 @@ include 'header.php';
 </div>
 
 <div class="container-fluid">
+    <!-- Cronologia esportazioni -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0"><i class="fas fa-history"></i> Cronologia Esportazioni</h5>
+        </div>
+        <div class="card-body p-0">
+            <?php
+            // Recupera l'user_id
+            $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+            $stmt->bind_param('s', $phone);
+            $stmt->execute();
+            $stmt->bind_result($user_id);
+            $stmt->fetch();
+            $stmt->close();
+            // Recupera la cronologia esportazioni
+            $sql_exports = "SELECT * FROM exported_reports WHERE user_id = ? ORDER BY created_at DESC LIMIT 30";
+            $stmt = $conn->prepare($sql_exports);
+            $stmt->bind_param('i', $user_id);
+            $stmt->execute();
+            $result_exports = $stmt->get_result();
+            if ($result_exports && $result_exports->num_rows > 0) {
+                echo '<div class="table-responsive"><table class="table table-striped mb-0">';
+                echo '<thead><tr><th>Data/Ora</th><th>Tipo</th><th>Vista</th><th>Periodo</th><th>Categoria</th><th>File</th><th>Download</th></tr></thead><tbody>';
+                while($exp = $result_exports->fetch_assoc()) {
+                    // Badge tipo
+                    $badge = '';
+                    if ($exp['export_type'] == 'csv') $badge = '<span class="badge badge-primary"><i class="fas fa-file-csv"></i> CSV</span>';
+                    elseif ($exp['export_type'] == 'excel') $badge = '<span class="badge badge-success"><i class="fas fa-file-excel"></i> Excel</span>';
+                    elseif ($exp['export_type'] == 'pdf') $badge = '<span class="badge badge-danger"><i class="fas fa-file-pdf"></i> PDF</span>';
+                    // Periodo
+                    $periodo = '';
+                    if ($exp['export_view'] == 'monthly') $periodo = get_month_name($exp['export_month']).' '.$exp['export_year'];
+                    elseif ($exp['export_view'] == 'yearly') $periodo = $exp['export_year'];
+                    elseif ($exp['export_view'] == 'category') $periodo = $exp['export_year'];
+                    else $periodo = '-';
+                    // Download link
+                    $download = '';
+                    if (!empty($exp['download_url'])) {
+                        $download = '<a href="'.htmlspecialchars($exp['download_url']).'" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-download"></i></a>';
+                    } else {
+                        // Prova a ricostruire il download per file generati al volo
+                        $download = '<form method="get" action="reports.php" class="d-inline">
+                            <input type="hidden" name="export" value="'.htmlspecialchars($exp['export_type']).'">
+                            <input type="hidden" name="view" value="'.htmlspecialchars($exp['export_view']).'">
+                            <input type="hidden" name="month" value="'.htmlspecialchars($exp['export_month']).'">
+                            <input type="hidden" name="year" value="'.htmlspecialchars($exp['export_year']).'">
+                            <input type="hidden" name="category" value="'.htmlspecialchars($exp['export_category']).'">
+                            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></button>
+                        </form>';
+                    }
+                    echo '<tr>';
+                    echo '<td>'.date('d/m/Y H:i', strtotime($exp['created_at'] ?? $exp['timestamp'] ?? 'now')).'</td>';
+                    echo '<td>'.$badge.'</td>';
+                    echo '<td>'.ucfirst($exp['export_view']).'</td>';
+                    echo '<td>'.$periodo.'</td>';
+                    echo '<td>'.htmlspecialchars($exp['export_category']).'</td>';
+                    echo '<td>'.htmlspecialchars($exp['file_name']).'</td>';
+                    echo '<td>'.$download.'</td>';
+                    echo '</tr>';
+                }
+                echo '</tbody></table></div>';
+            } else {
+                echo '<div class="p-3 text-center text-muted">Nessuna esportazione trovata.</div>';
+            }
+            $stmt->close();
+            ?>
+        </div>
+    </div>
+    <!-- Fine cronologia esportazioni -->
+    
     <!-- Pulsanti esportazione -->
     <div class="mb-3">
         <form method="get" action="reports.php" class="d-inline">
@@ -321,6 +439,26 @@ include 'header.php';
                 </div>
                 <?php } ?>
             </form>
+        </div>
+    </div>
+    
+    <!-- Grafici report -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info"><h5 class="card-title mb-0">Distribuzione Spese per Categoria</h5></div>
+                <div class="card-body">
+                    <canvas id="expense-category-chart" style="height:320px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary"><h5 class="card-title mb-0">Andamento Giornaliero</h5></div>
+                <div class="card-body">
+                    <canvas id="daily-trend-chart" style="height:320px;"></canvas>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -980,7 +1118,9 @@ function initExpenseCategoryChart() {
                 labels: data.categories,
                 datasets: [{
                     data: data.amounts,
-                    backgroundColor: data.colors
+                    backgroundColor: data.colors || [
+                        '#007bff','#28a745','#dc3545','#ffc107','#17a2b8','#6f42c1','#fd7e14','#20c997','#6610f2','#e83e8c'
+                    ]
                 }]
             },
             options: {
@@ -992,10 +1132,7 @@ function initExpenseCategoryChart() {
                             label: function(context) {
                                 let label = context.label || '';
                                 let value = context.raw || 0;
-                                return label + ': ' + new Intl.NumberFormat('it-IT', {
-                                    style: 'currency',
-                                    currency: 'EUR'
-                                }).format(value);
+                                return label + ': ' + new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
                             }
                         }
                     }
@@ -1010,8 +1147,59 @@ function initExpenseCategoryChart() {
 
 // Grafico andamento giornaliero (report mensile)
 function initDailyChart() {
-    // Implementazione del grafico andamento giornaliero
-    // (simile alle altre funzioni di grafico, ma con dati giornalieri)
+    const ctx = document.getElementById('daily-trend-chart');
+    
+    if (!ctx) return;
+    
+    fetch('get_chart_data.php?type=daily_trend&month=<?php echo $month; ?>&year=<?php echo $year; ?>')
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error(data.error);
+            return;
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Entrate',
+                        data: data.income,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40,167,69,0.1)',
+                        fill: true
+                    },
+                    {
+                        label: 'Uscite',
+                        data: data.expense,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220,53,69,0.1)',
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.raw || 0;
+                                return label + ': ' + new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error loading daily trend data:', error);
+    });
 }
 
 // Grafico andamento mensile (report annuale)
