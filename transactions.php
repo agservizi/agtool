@@ -212,7 +212,7 @@ include 'header.php';
                             <th class="text-right">Azioni</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="transactions-tbody">
                         <?php
                         // Costruisci la query per le transazioni con i filtri applicati
                         $where = [];
@@ -261,7 +261,7 @@ include 'header.php';
                                 echo "<td class='{$color_class} text-right'>{$amount}</td>";
                                 echo "<td class='text-right'>";
                                 echo "<a href='edit_transaction?id={$row['id']}' class='btn btn-sm btn-info'>Modifica</a> ";
-                                echo "<a href='transactions?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\'Sei sicuro di voler eliminare questa transazione?\')'>Elimina</a>";
+                                echo "<a href='transactions?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\\'Sei sicuro di voler eliminare questa transazione?\\')'>Elimina</a>";
                                 echo "</td>";
                                 echo "</tr>";
                             }
@@ -282,5 +282,60 @@ include 'header.php';
 <?php if (isset($_GET['error'])): ?>
 <script>document.addEventListener('DOMContentLoaded',function(){showToast('error','Errore nel salvataggio della transazione!');});</script>
 <?php endif; ?>
+
+<?php
+// Gestisci richiesta AJAX per aggiornamento tabella transazioni
+if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
+    ob_start();
+    // Costruisci la query per le transazioni con i filtri applicati
+    $where = [];
+    if (!empty($filter_type)) {
+        $where[] = "type = '$filter_type'";
+    }
+    if (!empty($filter_category)) {
+        $where[] = "category = '$filter_category'";
+    }
+    if (!empty($filter_start_date)) {
+        $where[] = "date >= '$filter_start_date'";
+    }
+    if (!empty($filter_end_date)) {
+        $where[] = "date <= '$filter_end_date'";
+    }
+    $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
+    $sql = "SELECT t.*, c.color 
+            FROM transactions t
+            LEFT JOIN categories c ON t.category = c.name AND t.type = c.type
+            $where_clause
+            ORDER BY t.date DESC";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $color_class = ($row['type'] == 'entrata') ? 'text-success' : 'text-danger';
+            $amount_sign = ($row['type'] == 'entrata') ? '+' : '-';
+            $amount = $amount_sign . ' ' . format_currency($row['amount']);
+            $date = format_date($row['date']);
+            $category_color = $row['color'] ?? '#3498db';
+            $type_icon = ($row['type'] == 'entrata') ? 'fa-arrow-up' : 'fa-arrow-down';
+            $type_label = ($row['type'] == 'entrata') ? 'Entrata' : 'Uscita';
+            echo "<tr>";
+            echo "<td>{$date}</td>";
+            echo "<td><i class='fas {$type_icon}'></i> {$type_label}</td>";
+            echo "<td>{$row['description']}</td>";
+            echo "<td><span class='badge' style='background-color: {$category_color}'>{$row['category']}</span></td>";
+            echo "<td class='{$color_class} text-right'>{$amount}</td>";
+            echo "<td class='text-right'>";
+            echo "<a href='edit_transaction?id={$row['id']}' class='btn btn-sm btn-info'>Modifica</a> ";
+            echo "<a href='transactions?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\\'Sei sicuro di voler eliminare questa transazione?\\')'>Elimina</a>";
+            echo "</td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='6' class='text-center'>Nessuna transazione trovata</td></tr>";
+    }
+    $html = ob_get_clean();
+    echo $html;
+    exit;
+}
+?>
 
 <?php include 'footer.php'; ?>

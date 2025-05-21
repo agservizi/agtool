@@ -48,11 +48,7 @@ function initTransactionForm() {
                     showAlert('success', data.message);
                     $('#addTransactionModal').modal('hide');
                     transactionForm.reset();
-                    
-                    // Ricarica la pagina dopo un breve ritardo
-                    setTimeout(() => {
-                        window.location.href = 'transactions.php';
-                    }, 1500);
+                    refreshTransactionsTable();
                 } else {
                     showAlert('danger', data.message);
                 }
@@ -64,6 +60,22 @@ function initTransactionForm() {
             return false;
         });
     }
+}
+
+// Aggiorna la tabella delle transazioni senza ricaricare la pagina
+function refreshTransactionsTable() {
+    const tbody = document.getElementById('transactions-tbody');
+    if (!tbody) {
+        // Se non esiste il tbody con id, ricarica la pagina come fallback
+        window.location.reload();
+        return;
+    }
+    fetch('transactions.php?ajax=1')
+        .then(response => response.text())
+        .then(html => {
+            tbody.innerHTML = html;
+        })
+        .catch(() => window.location.reload());
 }
 
 /**
