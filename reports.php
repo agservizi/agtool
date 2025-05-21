@@ -473,13 +473,19 @@ include 'header.php';
                       WHERE type = 'entrata' AND MONTH(date) = $month AND YEAR(date) = $year";
         $sql_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
                        WHERE type = 'uscita' AND MONTH(date) = $month AND YEAR(date) = $year";
-        
+        $sql_fixed_expense = "SELECT COALESCE(SUM(t.amount), 0) as total FROM transactions t
+    LEFT JOIN categories c ON t.category = c.name AND t.type = c.type
+    WHERE t.type = 'uscita' AND c.fixed_expense = 1 AND MONTH(t.date) = $month AND YEAR(t.date) = $year";
+
         $result_income = $conn->query($sql_income);
         $result_expense = $conn->query($sql_expense);
+        $result_fixed_expense = $conn->query($sql_fixed_expense);
         
         $income = $result_income->fetch_assoc()['total'];
         $expense = $result_expense->fetch_assoc()['total'];
+        $fixed_expense = $result_fixed_expense->fetch_assoc()['total'];
         $savings = $income - $expense;
+        $real_savings = $income - $fixed_expense;
     ?>
     
     <div class="row">
@@ -509,11 +515,18 @@ include 'header.php';
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="info-box <?php echo $savings >= 0 ? 'bg-info' : 'bg-warning'; ?>">
+                            <div class="info-box bg-info">
                                 <span class="info-box-icon"><i class="fas fa-wallet"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Risparmio Mensile</span>
+                                    <span class="info-box-text">Saldo Netto</span>
                                     <span class="info-box-number"><?php echo format_currency($savings); ?></span>
+                                </div>
+                            </div>
+                            <div class="info-box bg-warning mt-2">
+                                <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Risparmio Reale (dopo spese fisse)</span>
+                                    <span class="info-box-number"><?php echo format_currency($real_savings); ?></span>
                                 </div>
                             </div>
                         </div>

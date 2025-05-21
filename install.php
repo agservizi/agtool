@@ -27,6 +27,7 @@ $sql = "CREATE TABLE IF NOT EXISTS categories (
     name VARCHAR(100) NOT NULL,
     type ENUM('entrata', 'uscita') NOT NULL,
     color VARCHAR(20) DEFAULT '#3498db',
+    fixed_expense TINYINT(1) DEFAULT 0,
     UNIQUE KEY unique_cat (name, type)
 )";
 if ($conn->query($sql) === FALSE) {

@@ -42,6 +42,14 @@ if ($chart_type === 'income_expense') {
         $result_expense = $conn->query($sql_expense);
         $expense = $result_expense->fetch_assoc()['total'];
         
+        // Ottieni le uscite fisse del mese
+        $sql_fixed_expense = "SELECT COALESCE(SUM(t.amount), 0) as total FROM transactions t
+            LEFT JOIN categories c ON t.category = c.name AND t.type = c.type
+            WHERE t.type = 'uscita' AND c.fixed_expense = 1 AND MONTH(t.date) = $month AND YEAR(t.date) = $year";
+        $result_fixed_expense = $conn->query($sql_fixed_expense);
+        $fixed_expense = $result_fixed_expense->fetch_assoc()['total'];
+        $real_savings = $income - $fixed_expense;
+        
         // Calcola il risparmio del mese
         $savings = $income - $expense;
         
@@ -57,7 +65,8 @@ if ($chart_type === 'income_expense') {
         'labels' => $labels,
         'income' => $income_data,
         'expense' => $expense_data,
-        'savings' => $savings_data
+        'savings' => $savings_data,
+        'real_savings' => $real_savings
     ]);
     exit;
 }

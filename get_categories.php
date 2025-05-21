@@ -25,7 +25,8 @@ if ($result->num_rows > 0) {
         $categories[] = [
             'id' => $row['id'],
             'name' => $row['name'],
-            'color' => $row['color']
+            'color' => $row['color'],
+            'fixed_expense' => isset($row['fixed_expense']) ? (int)$row['fixed_expense'] : 0
         ];
     }
 }
