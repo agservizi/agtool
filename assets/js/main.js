@@ -60,6 +60,7 @@ function initTransactionForm() {
                 console.error('Error:', error);
                 showAlert('danger', 'Si è verificato un errore durante l\'elaborazione della richiesta');
             });
+            return false;
         });
     }
 }
