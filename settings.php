@@ -21,6 +21,14 @@ $stmt->bind_result($user_id, $user_email);
 $stmt->fetch();
 $stmt->close();
 
+// Recupera le impostazioni dell'utente
+$settings_stmt = $conn->prepare("SELECT email_notifications, sms_notifications, theme, language FROM user_settings WHERE user_id = ?");
+$settings_stmt->bind_param('i', $user_id);
+$settings_stmt->execute();
+$settings_stmt->bind_result($email_notifications, $sms_notifications, $theme, $language);
+$settings_stmt->fetch();
+$settings_stmt->close();
+
 include 'header.php';
 ?>
 <div class="content-header">
@@ -58,15 +66,15 @@ include 'header.php';
                         <div class="form-group">
                             <label>Tema</label>
                             <select class="form-control" name="theme">
-                                <option value="light">Chiaro</option>
-                                <option value="dark">Scuro</option>
+                                <option value="light" <?php if(isset($theme) && $theme=="light") echo 'selected'; ?>>Chiaro</option>
+                                <option value="dark" <?php if(isset($theme) && $theme=="dark") echo 'selected'; ?>>Scuro</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Lingua</label>
                             <select class="form-control" name="language">
-                                <option value="it">Italiano</option>
-                                <option value="en">English</option>
+                                <option value="it" <?php if(isset($language) && $language=="it") echo 'selected'; ?>>Italiano</option>
+                                <option value="en" <?php if(isset($language) && $language=="en") echo 'selected'; ?>>English</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-secondary">Salva Preferenze</button>
@@ -92,10 +100,10 @@ include 'header.php';
                 <div class="card-body">
                     <form id="notifications-form">
                         <div class="form-group">
-                            <label><input type="checkbox" name="email_notifications"> Notifiche Email</label>
+                            <label><input type="checkbox" name="email_notifications" <?php if(isset($email_notifications) && $email_notifications) echo 'checked'; ?>> Notifiche Email</label>
                         </div>
                         <div class="form-group">
-                            <label><input type="checkbox" name="sms_notifications"> Notifiche SMS</label>
+                            <label><input type="checkbox" name="sms_notifications" <?php if(isset($sms_notifications) && $sms_notifications) echo 'checked'; ?>> Notifiche SMS</label>
                         </div>
                         <button type="submit" class="btn btn-warning">Salva Notifiche</button>
                     </form>
@@ -130,15 +138,15 @@ function ajaxSettings(formId, action, successMsg) {
         fetch('save_settings.php', {
             method: 'POST',
             body: formData
-        })
+        });
         .then(r => r.json())
-        .then(data => {
+        .then((data) => {
             if(data.status==='success') showToast('success', successMsg || data.message);
             else showToast('error', data.message);
             if(action==='delete_account' && data.status==='success') setTimeout(()=>window.location='login',1500);
         })
         .catch(()=>showToast('error','Errore di rete'));
-    });
+    };
 }
 ajaxSettings('profile-form','profile','Profilo aggiornato!');
 ajaxSettings('preferences-form','preferences','Preferenze salvate!');
