@@ -167,7 +167,7 @@ $stmt->close();
                         <li class="nav-item">
                             <a href="advisor.php" class="nav-link">
                                 <i class="nav-icon fas fa-lightbulb"></i>
-                                <p>Consigliere Finanziario</p>
+                                <p>Consulente</p>
                             </a>
                         </li>
                         <!-- Nuove voci di menu per Notifiche e Impostazioni -->
