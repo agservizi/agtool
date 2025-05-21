@@ -93,8 +93,42 @@ while ($stmt->fetch()) {
 }
 $stmt->close();
 
-// Salva le notifiche in tabella (opzionale, qui solo se vuoi loggarle)
-// ...
+// Salva le notifiche in tabella (solo se non già presenti per oggi con stesso titolo e messaggio)
+foreach ($notifiche as $msg) {
+    // Determina titolo e tipo
+    if (strpos($msg, 'limite di spesa') !== false) {
+        $title = 'Limite di spesa superato';
+        $type = 'email';
+    } elseif (strpos($msg, 'Obiettivo di risparmio raggiunto') !== false) {
+        $title = 'Obiettivo raggiunto';
+        $type = 'email';
+    } elseif (strpos($msg, 'in scadenza') !== false) {
+        $title = 'Obiettivo in scadenza';
+        $type = 'email';
+    } elseif (strpos($msg, 'Ricorrenza') !== false) {
+        $title = 'Ricorrenza in arrivo';
+        $type = 'email';
+    } else {
+        $title = 'Notifica';
+        $type = 'email';
+    }
+    // Verifica se già presente oggi
+    $sql = "SELECT id FROM notifications WHERE user_id = ? AND title = ? AND message = ? AND DATE(created_at) = CURDATE()";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('iss', $user_id, $title, $msg);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows == 0) {
+        $stmt->close();
+        $sql = "INSERT INTO notifications (user_id, type, title, message, status, scheduled_at) VALUES (?, ?, ?, ?, 'pending', NOW())";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('isss', $user_id, $type, $title, $msg);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        $stmt->close();
+    }
+}
 
 if (count($notifiche) > 0) {
     echo json_encode(['status'=>'ok','notifiche'=>$notifiche]);

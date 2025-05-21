@@ -14,7 +14,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Controlla notifiche automatiche
     checkAutoNotifications();
+    setInterval(updateNotificationBadge, 60000);
+    // Marca notifiche come lette al click sulla campanella
+    var bell = document.querySelector('.fa-bell');
+    if (bell) {
+        bell.addEventListener('click', function() {
+            fetch('notifications.php?ajax=read', { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    updateNotificationBadge();
+                });
+        });
+    }
 });
+
+function updateNotificationBadge() {
+    fetch('notifications.php?ajax=1', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var badge = document.querySelector('.navbar-badge');
+            if (badge) {
+                if (data.unread_count && data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = '';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(function(){});
+}
 
 /**
  * Controlla notifiche automatiche (limiti, obiettivi, ricorrenze)
