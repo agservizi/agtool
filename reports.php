@@ -134,13 +134,12 @@ if (isset($_GET['export'])) {
             http_response_code(500);
             echo 'Errore: libreria FPDF non disponibile. Verifica l\'installazione con composer require setasign/fpdf';
             exit;
-        }        // Definizione della classe per il report PDF con compatibilità PHP
-        // Import the FPDF namespace
-        use setasign\Fpdf\Fpdf;
-
-        class PDFReport extends Fpdf {
+        }
+        
+        // Definizione della classe per il report PDF
+        class PDFReport extends FPDF {
             // Header della pagina
-            public function Header() {
+            function Header() {
                 $this->SetFillColor(0,123,255);
                 $this->Rect(0,0,210,30,'F');
                 if (file_exists(__DIR__.'/assets/img/logo-192.png')) {
@@ -150,7 +149,7 @@ if (isset($_GET['export'])) {
                 $this->SetTextColor(255,255,255);
                 $this->Cell(0,15,'AGTool Finance - Report Proforma',0,1,'C');
                 $this->Ln(2);
-            public function Footer() {
+            }
             
             // Footer della pagina
             function Footer() {
@@ -158,7 +157,7 @@ if (isset($_GET['export'])) {
                 $this->SetFont('Arial','I',8);
                 $this->SetTextColor(150,150,150);
                 $this->Cell(0,10,'Generato il '.date('d/m/Y H:i').' - Pagina '.$this->PageNo().'/{nb}',0,0,'C');
-            public function TableHeader() {
+            }
             
             // Intestazione della tabella
             function TableHeader() {
@@ -170,16 +169,21 @@ if (isset($_GET['export'])) {
                 $this->Cell(40,10,'Categoria',1,0,'C',true);
                 $this->Cell(20,10,'Tipo',1,0,'C',true);
                 $this->Cell(30,10,'Importo',1,1,'C',true);
-            public function TableRow($row) {
+            }
             
             // Riga della tabella
             function TableRow($row) {
                 $this->SetFont('Arial','',10);
                 $this->SetTextColor(0,0,0);
                 $this->Cell(30,9,$row['date'],1,0,'C');
+                
                 // Convertiamo i caratteri per evitare problemi di encoding
                 $description = mb_convert_encoding($row['description'], 'ISO-8859-1', 'UTF-8');
                 $category = mb_convert_encoding($row['category'], 'ISO-8859-1', 'UTF-8');
+                
+                // Aggiungiamo le celle per descrizione e categoria
+                $this->Cell(60,9,$description,1,0,'L');
+                $this->Cell(40,9,$category,1,0,'L');
                 
                 switch ($row['type']) {
                     case 'entrata':
@@ -189,14 +193,13 @@ if (isset($_GET['export'])) {
                         $this->SetTextColor(220,53,69);
                         break;
                 }
-                } else {
-                    $this->SetTextColor(220,53,69);
-                }
                 $this->Cell(20,9,ucfirst($row['type']),1,0,'C');
                 $this->SetTextColor(0,0,0);
                 $this->Cell(30,9,number_format($row['amount'],2,',','.'),1,1,'R');
             }
-        }        // Preparazione del file PDF
+        }
+        
+        // Preparazione del file PDF
         $file_name = "report-".date('Ymd-His').".pdf";
         $file_path = $exports_dir . "/$file_name";
         $download_url = 'exports/' . $file_name;
