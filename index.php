@@ -327,7 +327,7 @@ $stmt->close();
                             <!-- Consigliere Finanziario Card -->
                             <div class="card direct-chat direct-chat-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Consigliere Finanziario</h3>
+                                    <h3 class="card-title">Consulente</h3>
                                 </div>
                                 <div class="card-body" id="financial-advisor">
                                     <div class="direct-chat-messages" id="advisor-messages">
