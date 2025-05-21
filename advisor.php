@@ -98,10 +98,11 @@ function get_ai_advice_from_openrouter($question, $user_context = '') {
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     $response = curl_exec($ch);
     $err = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     
-    if ($err || !$response) {
-        return 'Errore nella richiesta AI. Riprova più tardi.';
+    if ($err || !$response || $http_code !== 200) {
+        return 'Mi dispiace, si è verificato un errore durante l\'elaborazione della richiesta. Codice HTTP: ' . $http_code . ' - Errore: ' . $err . ' - Risposta: ' . htmlspecialchars($response);
     }
     $json = json_decode($response, true);
     if (isset($json['choices'][0]['message']['content'])) {
