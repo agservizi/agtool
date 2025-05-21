@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_phone'])) {
     exit;
 }
 $phone = $_SESSION['user_phone'];
-$stmt = $conn->prepare("SELECT id, email FROM users WHERE phone = ?");
+$stmt = $conn->prepare("SELECT id, email, monthly_limit FROM users WHERE phone = ?");
 $stmt->bind_param('s', $phone);
 $stmt->execute();
 $stmt->store_result();
@@ -17,7 +17,7 @@ if ($stmt->num_rows === 0) {
     header('Location: login');
     exit;
 }
-$stmt->bind_result($user_id, $user_email);
+$stmt->bind_result($user_id, $user_email, $monthly_limit);
 $stmt->fetch();
 $stmt->close();
 
@@ -87,7 +87,7 @@ include 'header.php';
                     <form id="limit-form">
                         <div class="form-group">
                             <label>Limite spesa mensile (€)</label>
-                            <input type="number" class="form-control" name="monthly_limit" min="0" step="0.01" value="">
+                            <input type="number" class="form-control" name="monthly_limit" min="0" step="0.01" value="<?php echo htmlspecialchars($monthly_limit ?? ''); ?>">
                         </div>
                         <button type="submit" class="btn btn-info">Salva Limite</button>
                     </form>
