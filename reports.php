@@ -19,6 +19,151 @@ if ($stmt->num_rows === 0) {
 }
 $stmt->close();
 
+// --- ESPORTAZIONE DATI REPORT (PRIMA DI QUALSIASI OUTPUT) ---
+if (isset($_GET['export'])) {
+    $export_type = $_GET['export'];
+    $export_view = $_GET['view'] ?? 'monthly';
+    $export_month = intval($_GET['month'] ?? date('m'));
+    $export_year = intval($_GET['year'] ?? date('Y'));
+    $export_category = $_GET['category'] ?? '';
+    $where = "WHERE 1=1";
+    if ($export_view == 'monthly') {
+        $where .= " AND MONTH(date) = $export_month AND YEAR(date) = $export_year";
+    } elseif ($export_view == 'yearly') {
+        $where .= " AND YEAR(date) = $export_year";
+    } elseif ($export_view == 'category') {
+        $where .= " AND YEAR(date) = $export_year";
+        if (!empty($export_category)) {
+            $where .= " AND category = '" . $conn->real_escape_string($export_category) . "'";
+        }
+    }
+    $sql = "SELECT date, description, category, type, amount FROM transactions $where ORDER BY date DESC";
+    $result = $conn->query($sql);
+    $rows = [];
+    if ($result && $result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+    }
+    if ($export_type == 'csv') {
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="report.csv"');
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo']);
+        foreach ($rows as $r) {
+            fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']]);
+        }
+        fclose($out);
+        exit;
+    }
+    if ($export_type == 'excel') {
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="report.xls"');
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo'], "\t");
+        foreach ($rows as $r) {
+            fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']], "\t");
+        }
+        fclose($out);
+        exit;
+    }
+    if ($export_type == 'pdf') {
+        require_once __DIR__ . '/vendor/autoload.php';
+        if (!class_exists('FPDF')) {
+            echo '<div class="alert alert-danger">Libreria FPDF non installata. Installa con composer require setasign/fpdf</div>';
+            exit;
+        }
+        class PDFReport extends FPDF {
+            function Header() {
+                $this->SetFillColor(0,123,255);
+                $this->Rect(0,0,210,30,'F');
+                if (file_exists(__DIR__.'/assets/img/logo-192.png')) {
+                    $this->Image(__DIR__.'/assets/img/logo-192.png',10,7,16);
+                }
+                $this->SetFont('Arial','B',18);
+                $this->SetTextColor(255,255,255);
+                $this->Cell(0,15,'AGTool Finance - Report Proforma',0,1,'C');
+                $this->Ln(2);
+            }
+            function Footer() {
+                $this->SetY(-15);
+                $this->SetFont('Arial','I',8);
+                $this->SetTextColor(150,150,150);
+                $this->Cell(0,10,'Generato il '.date('d/m/Y H:i').' - Pagina '.$this->PageNo().'/{nb}',0,0,'C');
+            }
+            function TableHeader() {
+                $this->SetFont('Arial','B',11);
+                $this->SetFillColor(230,230,230);
+                $this->SetTextColor(0,0,0);
+                $this->Cell(30,10,'Data',1,0,'C',true);
+                $this->Cell(60,10,'Descrizione',1,0,'C',true);
+                $this->Cell(40,10,'Categoria',1,0,'C',true);
+                $this->Cell(20,10,'Tipo',1,0,'C',true);
+                $this->Cell(30,10,'Importo',1,1,'C',true);
+            }
+            function TableRow($row) {
+                $this->SetFont('Arial','',10);
+                $this->SetTextColor(0,0,0);
+                $this->Cell(30,9,$row['date'],1,0,'C');
+                $this->Cell(60,9,utf8_decode($row['description']),1,0,'L');
+                $this->Cell(40,9,utf8_decode($row['category']),1,0,'L');
+                if ($row['type'] == 'entrata') {
+                    $this->SetTextColor(40,167,69);
+                } else {
+                    $this->SetTextColor(220,53,69);
+                }
+                $this->Cell(20,9,ucfirst($row['type']),1,0,'C');
+                $this->SetTextColor(0,0,0);
+                $this->Cell(30,9,number_format($row['amount'],2,',','.'),1,1,'R');
+            }
+        }
+        $pdf = new PDFReport('P','mm','A4');
+        $pdf->AliasNbPages();
+        $pdf->AddPage();
+        $pdf->Ln(10);
+        $pdf->SetFont('Arial','B',12);
+        $pdf->SetTextColor(0,123,255);
+        $pdf->Cell(0,8,'Periodo: '.($export_view=='monthly' ? get_month_name($export_month).' '.$export_year : ($export_view=='yearly' ? $export_year : '')),0,1,'L');
+        if ($export_view=='category' && !empty($export_category)) {
+            $pdf->Cell(0,8,'Categoria: '.utf8_decode($export_category),0,1,'L');
+        }
+        $pdf->Ln(2);
+        $pdf->TableHeader();
+        if (count($rows) > 0) {
+            foreach ($rows as $r) {
+                $pdf->TableRow($r);
+            }
+        } else {
+            $pdf->SetFont('Arial','I',11);
+            $pdf->Cell(180,10,'Nessun dato disponibile per il periodo selezionato.',1,1,'C');
+        }
+        $pdf->Ln(5);
+        $pdf->SetFont('Arial','B',12);
+        $pdf->SetFillColor(240,240,240);
+        $pdf->SetTextColor(0,0,0);
+        $tot_entrate = 0; $tot_uscite = 0;
+        foreach ($rows as $r) {
+            if ($r['type'] == 'entrata') $tot_entrate += $r['amount'];
+            else $tot_uscite += $r['amount'];
+        }
+        $pdf->Cell(60,10,'Totale Entrate:',1,0,'R',true);
+        $pdf->SetTextColor(40,167,69);
+        $pdf->Cell(40,10,number_format($tot_entrate,2,',','.'),1,0,'R',true);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->Cell(40,10,'Totale Uscite:',1,0,'R',true);
+        $pdf->SetTextColor(220,53,69);
+        $pdf->Cell(40,10,number_format($tot_uscite,2,',','.'),1,1,'R',true);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->Cell(60,10,'Saldo Netto:',1,0,'R',true);
+        $saldo = $tot_entrate - $tot_uscite;
+        $pdf->SetTextColor($saldo >= 0 ? 40 : 220, $saldo >= 0 ? 167 : 53, $saldo >= 0 ? 69 : 69);
+        $pdf->Cell(40,10,number_format($saldo,2,',','.'),1,1,'R',true);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->Output('D','report.pdf');
+        exit;
+    }
+}
+
 // Impostazione dei filtri
 $view = isset($_GET['view']) ? clean_input($_GET['view']) : 'monthly';
 $month = isset($_GET['month']) ? intval($_GET['month']) : date('m');
@@ -899,160 +1044,5 @@ function initYearlyTrendChart() {
     // (simile alle altre funzioni di grafico, ma con dati degli ultimi 12 mesi)
 }
 </script>
-
-<?php
-// --- ESPORTAZIONE DATI REPORT ---
-if (isset($_GET['export'])) {
-    $export_type = $_GET['export'];
-    $export_view = $_GET['view'] ?? 'monthly';
-    $export_month = intval($_GET['month'] ?? date('m'));
-    $export_year = intval($_GET['year'] ?? date('Y'));
-    $export_category = $_GET['category'] ?? '';
-
-    // Costruisci la query in base al filtro
-    $where = "WHERE 1=1";
-    if ($export_view == 'monthly') {
-        $where .= " AND MONTH(date) = $export_month AND YEAR(date) = $export_year";
-    } elseif ($export_view == 'yearly') {
-        $where .= " AND YEAR(date) = $export_year";
-    } elseif ($export_view == 'category') {
-        $where .= " AND YEAR(date) = $export_year";
-        if (!empty($export_category)) {
-            $where .= " AND category = '" . $conn->real_escape_string($export_category) . "'";
-        }
-    }
-    $sql = "SELECT date, description, category, type, amount FROM transactions $where ORDER BY date DESC";
-    $result = $conn->query($sql);
-    $rows = [];
-    if ($result && $result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            $rows[] = $row;
-        }
-    }
-    // Esporta CSV
-    if ($export_type == 'csv') {
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="report.csv"');
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo']);
-        foreach ($rows as $r) {
-            fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']]);
-        }
-        fclose($out);
-        exit;
-    }
-    // Esporta Excel (compatibile con Excel, ma formato CSV con estensione xls)
-    if ($export_type == 'excel') {
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="report.xls"');
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo'], "\t");
-        foreach ($rows as $r) {
-            fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']], "\t");
-        }
-        fclose($out);
-        exit;
-    }
-    // Esporta PDF (richiede FPDF)
-    if ($export_type == 'pdf') {
-        require_once __DIR__ . '/vendor/autoload.php';
-        if (!class_exists('FPDF')) {
-            echo '<div class="alert alert-danger">Libreria FPDF non installata. Installa con composer require setasign/fpdf</div>';
-            exit;
-        }
-        class PDFReport extends FPDF {
-            function Header() {
-                // Logo e intestazione
-                $this->SetFillColor(0,123,255);
-                $this->Rect(0,0,210,30,'F');
-                $this->Image(__DIR__.'/assets/img/logo-192.png',10,7,16);
-                $this->SetFont('Arial','B',18);
-                $this->SetTextColor(255,255,255);
-                $this->Cell(0,15,'AGTool Finance - Report Proforma',0,1,'C');
-                $this->Ln(2);
-            }
-            function Footer() {
-                $this->SetY(-15);
-                $this->SetFont('Arial','I',8);
-                $this->SetTextColor(150,150,150);
-                $this->Cell(0,10,'Generato il '.date('d/m/Y H:i').' - Pagina '.$this->PageNo().'/{nb}',0,0,'C');
-            }
-            function TableHeader() {
-                $this->SetFont('Arial','B',11);
-                $this->SetFillColor(230,230,230);
-                $this->SetTextColor(0,0,0);
-                $this->Cell(30,10,'Data',1,0,'C',true);
-                $this->Cell(60,10,'Descrizione',1,0,'C',true);
-                $this->Cell(40,10,'Categoria',1,0,'C',true);
-                $this->Cell(20,10,'Tipo',1,0,'C',true);
-                $this->Cell(30,10,'Importo',1,1,'C',true);
-            }
-            function TableRow($row) {
-                $this->SetFont('Arial','',10);
-                $this->SetTextColor(0,0,0);
-                $this->Cell(30,9,$row['date'],1,0,'C');
-                $this->Cell(60,9,utf8_decode($row['description']),1,0,'L');
-                $this->Cell(40,9,utf8_decode($row['category']),1,0,'L');
-                // Tipo con colore
-                if ($row['type'] == 'entrata') {
-                    $this->SetTextColor(40,167,69); // verde
-                } else {
-                    $this->SetTextColor(220,53,69); // rosso
-                }
-                $this->Cell(20,9,ucfirst($row['type']),1,0,'C');
-                $this->SetTextColor(0,0,0);
-                $this->Cell(30,9,number_format($row['amount'],2,',','.'),1,1,'R');
-            }
-        }
-        $pdf = new PDFReport('P','mm','A4');
-        $pdf->AliasNbPages();
-        $pdf->AddPage();
-        $pdf->Ln(10);
-        // Info riepilogo
-        $pdf->SetFont('Arial','B',12);
-        $pdf->SetTextColor(0,123,255);
-        $pdf->Cell(0,8,'Periodo: '.($export_view=='monthly' ? get_month_name($export_month).' '.$export_year : ($export_view=='yearly' ? $export_year : '')),0,1,'L');
-        if ($export_view=='category' && !empty($export_category)) {
-            $pdf->Cell(0,8,'Categoria: '.utf8_decode($export_category),0,1,'L');
-        }
-        $pdf->Ln(2);
-        // Tabella
-        $pdf->TableHeader();
-        if (count($rows) > 0) {
-            foreach ($rows as $r) {
-                $pdf->TableRow($r);
-            }
-        } else {
-            $pdf->SetFont('Arial','I',11);
-            $pdf->Cell(180,10,'Nessun dato disponibile per il periodo selezionato.',1,1,'C');
-        }
-        // Totali
-        $pdf->Ln(5);
-        $pdf->SetFont('Arial','B',12);
-        $pdf->SetFillColor(240,240,240);
-        $pdf->SetTextColor(0,0,0);
-        $tot_entrate = 0; $tot_uscite = 0;
-        foreach ($rows as $r) {
-            if ($r['type'] == 'entrata') $tot_entrate += $r['amount'];
-            else $tot_uscite += $r['amount'];
-        }
-        $pdf->Cell(60,10,'Totale Entrate:',1,0,'R',true);
-        $pdf->SetTextColor(40,167,69);
-        $pdf->Cell(40,10,number_format($tot_entrate,2,',','.'),1,0,'R',true);
-        $pdf->SetTextColor(0,0,0);
-        $pdf->Cell(40,10,'Totale Uscite:',1,0,'R',true);
-        $pdf->SetTextColor(220,53,69);
-        $pdf->Cell(40,10,number_format($tot_uscite,2,',','.'),1,1,'R',true);
-        $pdf->SetTextColor(0,0,0);
-        $pdf->Cell(60,10,'Saldo Netto:',1,0,'R',true);
-        $saldo = $tot_entrate - $tot_uscite;
-        $pdf->SetTextColor($saldo >= 0 ? 40 : 220, $saldo >= 0 ? 167 : 53, $saldo >= 0 ? 69 : 69);
-        $pdf->Cell(40,10,number_format($saldo,2,',','.'),1,1,'R',true);
-        $pdf->SetTextColor(0,0,0);
-        $pdf->Output('D','report.pdf');
-        exit;
-    }
-}
-?>
 
 <?php include 'footer.php'; ?>
