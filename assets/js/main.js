@@ -39,7 +39,8 @@ function initTransactionForm() {
             
             fetch('process_transaction.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.json())
             .then(data => {
