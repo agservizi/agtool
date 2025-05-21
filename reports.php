@@ -26,7 +26,14 @@ if (isset($_GET['export'])) {
     $export_month = intval($_GET['month'] ?? date('m'));
     $export_year = intval($_GET['year'] ?? date('Y'));
     $export_category = $_GET['category'] ?? '';
-    $where = "WHERE 1=1";
+    // Recupera user_id
+    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+    $stmt->bind_param('s', $phone);
+    $stmt->execute();
+    $stmt->bind_result($user_id);
+    $stmt->fetch();
+    $stmt->close();
+    $where = "WHERE user_id = $user_id";
     if ($export_view == 'monthly') {
         $where .= " AND MONTH(date) = $export_month AND YEAR(date) = $export_year";
     } elseif ($export_view == 'yearly') {
@@ -45,18 +52,10 @@ if (isset($_GET['export'])) {
             $rows[] = $row;
         }
     }
-    // Crea cartella exports se non esiste
     $exports_dir = __DIR__ . '/exports';
     if (!is_dir($exports_dir)) {
         mkdir($exports_dir, 0775, true);
     }
-    // Trova user_id
-    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-    $stmt->bind_param('s', $phone);
-    $stmt->execute();
-    $stmt->bind_result($user_id);
-    $stmt->fetch();
-    $stmt->close();
     function save_exported_report($conn, $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url) {
         $stmt = $conn->prepare("INSERT INTO exported_reports (user_id, export_type, export_view, export_month, export_year, export_category, file_name, file_path, download_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param('issiiisss', $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
@@ -74,10 +73,16 @@ if (isset($_GET['export'])) {
         }
         fclose($out);
         save_exported_report($conn, $user_id, 'csv', $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="'.$file_name.'"');
-        readfile($file_path);
-        exit;
+        if (file_exists($file_path)) {
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename="'.$file_name.'"');
+            readfile($file_path);
+            exit;
+        } else {
+            http_response_code(500);
+            echo 'Errore nella generazione del file CSV.';
+            exit;
+        }
     }
     if ($export_type == 'excel') {
         $file_name = "report-".date('Ymd-His').".xls";
@@ -90,15 +95,18 @@ if (isset($_GET['export'])) {
         }
         fclose($out);
         save_exported_report($conn, $user_id, 'excel', $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="'.$file_name.'"');
-        readfile($file_path);
-        exit;
+        if (file_exists($file_path)) {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="'.$file_name.'"');
+            readfile($file_path);
+            exit;
+        } else {
+            http_response_code(500);
+            echo 'Errore nella generazione del file Excel.';
+            exit;
+        }
     }
     if ($export_type == 'pdf') {
-        $file_name = "report-".date('Ymd-His').".pdf";
-        $file_path = $exports_dir . "/$file_name";
-        $download_url = 'exports/' . $file_name;
         require_once __DIR__ . '/vendor/autoload.php';
         require_once __DIR__ . '/vendor/setasign/fpdf/fpdf.php';
         if (!class_exists('FPDF')) {
@@ -106,7 +114,7 @@ if (isset($_GET['export'])) {
             exit;
         }
         class PDFReport extends FPDF {
-            function Header() {
+            public function Header(): void {
                 $this->SetFillColor(0,123,255);
                 $this->Rect(0,0,210,30,'F');
                 if (file_exists(__DIR__.'/assets/img/logo-192.png')) {
@@ -117,13 +125,13 @@ if (isset($_GET['export'])) {
                 $this->Cell(0,15,'AGTool Finance - Report Proforma',0,1,'C');
                 $this->Ln(2);
             }
-            function Footer() {
+            public function Footer(): void {
                 $this->SetY(-15);
                 $this->SetFont('Arial','I',8);
                 $this->SetTextColor(150,150,150);
                 $this->Cell(0,10,'Generato il '.date('d/m/Y H:i').' - Pagina '.$this->PageNo().'/{nb}',0,0,'C');
             }
-            function TableHeader() {
+            public function TableHeader(): void {
                 $this->SetFont('Arial','B',11);
                 $this->SetFillColor(230,230,230);
                 $this->SetTextColor(0,0,0);
@@ -133,12 +141,12 @@ if (isset($_GET['export'])) {
                 $this->Cell(20,10,'Tipo',1,0,'C',true);
                 $this->Cell(30,10,'Importo',1,1,'C',true);
             }
-            function TableRow($row) {
+            public function TableRow($row): void {
                 $this->SetFont('Arial','',10);
                 $this->SetTextColor(0,0,0);
                 $this->Cell(30,9,$row['date'],1,0,'C');
-                $this->Cell(60,9,utf8_decode($row['description']),1,0,'L');
-                $this->Cell(40,9,utf8_decode($row['category']),1,0,'L');
+                $this->Cell(60,9,mb_convert_encoding($row['description'], 'ISO-8859-1', 'UTF-8'),1,0,'L');
+                $this->Cell(40,9,mb_convert_encoding($row['category'], 'ISO-8859-1', 'UTF-8'),1,0,'L');
                 if ($row['type'] == 'entrata') {
                     $this->SetTextColor(40,167,69);
                 } else {
@@ -149,6 +157,9 @@ if (isset($_GET['export'])) {
                 $this->Cell(30,9,number_format($row['amount'],2,',','.'),1,1,'R');
             }
         }
+        $file_name = "report-".date('Ymd-His').".pdf";
+        $file_path = $exports_dir . "/$file_name";
+        $download_url = 'exports/' . $file_name;
         $pdf = new PDFReport('P','mm','A4');
         $pdf->AliasNbPages();
         $pdf->AddPage();
@@ -157,7 +168,7 @@ if (isset($_GET['export'])) {
         $pdf->SetTextColor(0,123,255);
         $pdf->Cell(0,8,'Periodo: '.($export_view=='monthly' ? get_month_name($export_month).' '.$export_year : ($export_view=='yearly' ? $export_year : '')),0,1,'L');
         if ($export_view=='category' && !empty($export_category)) {
-            $pdf->Cell(0,8,'Categoria: '.utf8_decode($export_category),0,1,'L');
+            $pdf->Cell(0,8,'Categoria: '.mb_convert_encoding($export_category, 'ISO-8859-1', 'UTF-8'),0,1,'L');
         }
         $pdf->Ln(2);
         $pdf->TableHeader();
@@ -193,10 +204,16 @@ if (isset($_GET['export'])) {
         $pdf->SetTextColor(0,0,0);
         $pdf->Output('F', $file_path);
         save_exported_report($conn, $user_id, 'pdf', $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="'.$file_name.'"');
-        readfile($file_path);
-        exit;
+        if (file_exists($file_path)) {
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="'.$file_name.'"');
+            readfile($file_path);
+            exit;
+        } else {
+            http_response_code(500);
+            echo 'Errore nella generazione del file PDF.';
+            exit;
+        }
     }
 }
 
