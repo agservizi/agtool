@@ -1,0 +1,1 @@
+I file cron_monthly_reports.php e cron_recurring.php sono stati rimossi perché non più necessari: tutte le funzionalità di generazione report e transazioni ricorrenti sono ora gestite tramite AJAX e interazione utente. Nessun collegamento a questi file è presente nel codice applicativo.
