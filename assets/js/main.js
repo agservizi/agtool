@@ -50,7 +50,7 @@ function initTransactionForm() {
                     
                     // Ricarica la pagina dopo un breve ritardo
                     setTimeout(() => {
-                        window.location.reload();
+                        window.location.href = 'transactions.php';
                     }, 1500);
                 } else {
                     showAlert('danger', data.message);
