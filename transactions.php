@@ -260,8 +260,8 @@ include 'header.php';
                                 echo "<td><span class='badge' style='background-color: {$category_color}'>{$row['category']}</span></td>";
                                 echo "<td class='{$color_class} text-right'>{$amount}</td>";
                                 echo "<td class='text-right'>";
-                                echo "<a href='edit_transaction.php?id={$row['id']}' class='btn btn-sm btn-info'><i class='fas fa-edit'></i></a> ";
-                                echo "<a href='transactions.php?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa transazione?\")'><i class='fas fa-trash'></i></a>";
+                                echo "<a href='edit_transaction?id={$row['id']}' class='btn btn-sm btn-info'>Modifica</a> ";
+                                echo "<a href='transactions?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\'Sei sicuro di voler eliminare questa transazione?\')'>Elimina</a>";
                                 echo "</td>";
                                 echo "</tr>";
                             }

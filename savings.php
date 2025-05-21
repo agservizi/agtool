@@ -97,7 +97,7 @@ include 'header.php';
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+                    <li class="breadcrumb-item"><a href="index">Home</a></li>
                     <li class="breadcrumb-item active">Obiettivi di Risparmio</li>
                 </ol>
             </div>
@@ -170,7 +170,7 @@ include 'header.php';
                                <i class="fas fa-plus-circle mr-2"></i> Aggiungi Contributo
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="savings.php?delete=<?php echo $row['id']; ?>" class="dropdown-item text-danger" 
+                            <a href="savings?delete=<?php echo $row['id']; ?>" class="dropdown-item text-danger" 
                                onclick="return confirm('Sei sicuro di voler eliminare questo obiettivo?')">
                                <i class="fas fa-trash mr-2"></i> Elimina
                             </a>
@@ -315,7 +315,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="process_goal.php" method="post">
+            <form action="process_goal" method="post">
                 <input type="hidden" name="action" value="edit">
                 <input type="hidden" name="id" id="edit-goal-id">
                 <div class="modal-body">

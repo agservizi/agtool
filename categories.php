@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         $sql = "INSERT INTO categories (name, type, color) VALUES ('$name', '$type', '$color')";
         
         if ($conn->query($sql) === TRUE) {
-            header("Location: categories.php?status=success&message=" . urlencode("Categoria aggiunta con successo"));
+            header("Location: categories?status=success&message=" . urlencode("Categoria aggiunta con successo"));
             exit;
         } else {
             $error = "Errore nell'aggiunta della categoria: " . $conn->error;
@@ -55,14 +55,14 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $count = $result_check->fetch_assoc()['count'];
     
     if ($count > 0) {
-        header("Location: categories.php?status=error&message=" . urlencode("Impossibile eliminare la categoria: ci sono transazioni associate"));
+        header("Location: categories?status=error&message=" . urlencode("Impossibile eliminare la categoria: ci sono transazioni associate"));
     } else {
         $sql = "DELETE FROM categories WHERE id = $id";
         
         if ($conn->query($sql) === TRUE) {
-            header("Location: categories.php?status=success&message=" . urlencode("Categoria eliminata con successo"));
+            header("Location: categories?status=success&message=" . urlencode("Categoria eliminata con successo"));
         } else {
-            header("Location: categories.php?status=error&message=" . urlencode("Errore nell'eliminazione della categoria: " . $conn->error));
+            header("Location: categories?status=error&message=" . urlencode("Errore nell'eliminazione della categoria: " . $conn->error));
         }
     }
     exit;
@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                                   WHERE category = '{$original['name']}' AND type = '{$original['type']}'";
         $conn->query($sql_update_transactions);
         
-        header("Location: categories.php?status=success&message=" . urlencode("Categoria aggiornata con successo"));
+        header("Location: categories?status=success&message=" . urlencode("Categoria aggiornata con successo"));
         exit;
     } else {
         $error = "Errore nell'aggiornamento della categoria: " . $conn->error;
@@ -153,7 +153,7 @@ include 'header.php';
                                     echo "<td><span class='badge' style='background-color: {$row['color']}'>&nbsp;</span> {$row['color']}</td>";
                                     echo "<td>";
                                     echo "<button class='btn btn-sm btn-info edit-category' data-id='{$row['id']}' data-name='{$row['name']}' data-color='{$row['color']}'><i class='fas fa-edit'></i></button> ";
-                                    echo "<a href='categories.php?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa categoria?\")'>
+                                    echo "<a href='categories?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa categoria?\")'>
                                           <i class='fas fa-trash'></i></a>";
                                     echo "</td>";
                                     echo "</tr>";
@@ -204,7 +204,7 @@ include 'header.php';
                                     echo "<td><span class='badge' style='background-color: {$row['color']}'>&nbsp;</span> {$row['color']}</td>";
                                     echo "<td>";
                                     echo "<button class='btn btn-sm btn-info edit-category' data-id='{$row['id']}' data-name='{$row['name']}' data-color='{$row['color']}'><i class='fas fa-edit'></i></button> ";
-                                    echo "<a href='categories.php?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa categoria?\")'>
+                                    echo "<a href='categories?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa categoria?\")'>
                                           <i class='fas fa-trash'></i></a>";
                                     echo "</td>";
                                     echo "</tr>";
@@ -296,7 +296,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="categories.php" method="post">
+            <form action="categories" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="add">
                     <div class="form-group">
@@ -334,7 +334,7 @@ include 'header.php';
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="categories.php" method="post">
+            <form action="categories" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" id="edit-category-id">

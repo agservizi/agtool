@@ -76,7 +76,7 @@ require_once 'inc/config.php';
                         <span class="dropdown-header"><?php echo $unread_count > 0 ? $unread_count.' nuove notifiche' : 'Nessuna nuova notifica'; ?></span>
                         <div class="dropdown-divider"></div>
                         <?php if (count($notifiche) > 0): foreach($notifiche as $n): ?>
-                            <a href="notifications.php" class="dropdown-item">
+                            <a href="notifications" class="dropdown-item">
                                 <i class="fas fa-info-circle mr-2"></i> <strong><?php echo htmlspecialchars($n['title']); ?></strong><br>
                                 <span style="font-size:0.95em;color:#666;"><?php echo htmlspecialchars($n['message']); ?></span>
                                 <span class="float-right text-muted text-sm"><?php echo $n['scheduled_at'] ? date('d/m/Y', strtotime($n['scheduled_at'])) : ''; ?></span>
@@ -86,12 +86,12 @@ require_once 'inc/config.php';
                             <span class="dropdown-item text-center text-muted">Nessuna notifica recente</span>
                             <div class="dropdown-divider"></div>
                         <?php endif; ?>
-                        <a href="notifications.php" class="dropdown-item dropdown-footer">Vedi tutte le notifiche</a>
+                        <a href="notifications" class="dropdown-item dropdown-footer">Vedi tutte le notifiche</a>
                     </div>
                 </li>
                 <?php } ?>
                 <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <a href="logout" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </li>
             </ul>
         </nav>
@@ -100,7 +100,7 @@ require_once 'inc/config.php';
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="index.php" class="brand-link">
+            <a href="index" class="brand-link">
                 <i class="fas fa-wallet ml-3 mr-2"></i>
                 <span class="brand-text font-weight-light">AGTool Finance</span>
             </a>

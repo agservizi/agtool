@@ -112,7 +112,7 @@ include 'header.php';
             <div class="card mb-4">
                 <div class="card-header bg-success text-white">Esporta Dati</div>
                 <div class="card-body">
-                    <form action="export.php" method="post">
+                    <form action="export" method="post">
                         <button type="submit" class="btn btn-success">Scarica CSV</button>
                     </form>
                 </div>
