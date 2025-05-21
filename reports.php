@@ -45,11 +45,23 @@ if (isset($_GET['export'])) {
             $rows[] = $row;
         }
     }
+    // Crea cartella exports se non esiste
+    $exports_dir = __DIR__ . '/exports';
+    if (!is_dir($exports_dir)) {
+        mkdir($exports_dir, 0775, true);
+    }
+    // Trova user_id
+    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+    $stmt->bind_param('s', $phone);
+    $stmt->execute();
+    $stmt->bind_result($user_id);
+    $stmt->fetch();
+    $stmt->close();
     if ($export_type == 'csv') {
         $file_name = "report-".date('Ymd-His').".csv";
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="'.$file_name.'"');
-        $out = fopen('php://output', 'w');
+        $file_path = $exports_dir . "/$file_name";
+        $download_url = 'exports/' . $file_name;
+        $out = fopen($file_path, 'w');
         fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo']);
         foreach ($rows as $r) {
             fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']]);
@@ -62,45 +74,39 @@ if (isset($_GET['export'])) {
             $stmt->execute();
             $stmt->close();
         }
-        // Trova user_id
-        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-        $stmt->bind_param('s', $phone);
-        $stmt->execute();
-        $stmt->bind_result($user_id);
-        $stmt->fetch();
-        $stmt->close();
-        save_exported_report($conn, $user_id, 'csv', $export_view, $export_month, $export_year, $export_category, $file_name, '', '');
+        save_exported_report($conn, $user_id, 'csv', $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
+        // Download immediato
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="'.$file_name.'"');
+        readfile($file_path);
         exit;
     }
     if ($export_type == 'excel') {
         $file_name = "report-".date('Ymd-His').".xls";
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="'.$file_name.'"');
-        $out = fopen('php://output', 'w');
+        $file_path = $exports_dir . "/$file_name";
+        $download_url = 'exports/' . $file_name;
+        $out = fopen($file_path, 'w');
         fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo'], "\t");
         foreach ($rows as $r) {
             fputcsv($out, [$r['date'],$r['description'],$r['category'],$r['type'],$r['amount']], "\t");
         }
         fclose($out);
-        // Salva il report esportato nella tabella exported_reports
         function save_exported_report($conn, $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url) {
             $stmt = $conn->prepare("INSERT INTO exported_reports (user_id, export_type, export_view, export_month, export_year, export_category, file_name, file_path, download_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param('issiiisss', $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
             $stmt->execute();
             $stmt->close();
         }
-        // Trova user_id
-        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-        $stmt->bind_param('s', $phone);
-        $stmt->execute();
-        $stmt->bind_result($user_id);
-        $stmt->fetch();
-        $stmt->close();
-        save_exported_report($conn, $user_id, 'excel', $export_view, $export_month, $export_year, $export_category, $file_name, '', '');
+        save_exported_report($conn, $user_id, 'excel', $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="'.$file_name.'"');
+        readfile($file_path);
         exit;
     }
     if ($export_type == 'pdf') {
         $file_name = "report-".date('Ymd-His').".pdf";
+        $file_path = $exports_dir . "/$file_name";
+        $download_url = 'exports/' . $file_name;
         require_once __DIR__ . '/vendor/autoload.php';
         if (!class_exists('FPDF')) {
             echo '<div class="alert alert-danger">Libreria FPDF non installata. Installa con composer require setasign/fpdf</div>';
@@ -192,22 +198,17 @@ if (isset($_GET['export'])) {
         $pdf->SetTextColor($saldo >= 0 ? 40 : 220, $saldo >= 0 ? 167 : 53, $saldo >= 0 ? 69 : 69);
         $pdf->Cell(40,10,number_format($saldo,2,',','.'),1,1,'R',true);
         $pdf->SetTextColor(0,0,0);
-        $pdf->Output('D',$file_name);
-        // Salva il report esportato nella tabella exported_reports
+        $pdf->Output('F', $file_path); // Salva su file
         function save_exported_report($conn, $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url) {
             $stmt = $conn->prepare("INSERT INTO exported_reports (user_id, export_type, export_view, export_month, export_year, export_category, file_name, file_path, download_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param('issiiisss', $user_id, $export_type, $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
             $stmt->execute();
             $stmt->close();
         }
-        // Trova user_id
-        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-        $stmt->bind_param('s', $phone);
-        $stmt->execute();
-        $stmt->bind_result($user_id);
-        $stmt->fetch();
-        $stmt->close();
-        save_exported_report($conn, $user_id, 'pdf', $export_view, $export_month, $export_year, $export_category, $file_name, '', '');
+        save_exported_report($conn, $user_id, 'pdf', $export_view, $export_month, $export_year, $export_category, $file_name, $file_path, $download_url);
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="'.$file_name.'"');
+        readfile($file_path);
         exit;
     }
 }
@@ -295,18 +296,18 @@ include 'header.php';
                     else $periodo = '-';
                     // Download link
                     $download = '';
-                    if (!empty($exp['download_url'])) {
-                        $download = '<a href="'.htmlspecialchars($exp['download_url']).'" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-download"></i></a>';
+                    if (!empty($exp['download_url']) && file_exists(__DIR__ . '/' . $exp['download_url'])) {
+                        $download = '<button type="button" class="btn btn-sm btn-outline-primary download-ajax" data-url="'.htmlspecialchars($exp['download_url']).'" data-filename="'.htmlspecialchars($exp['file_name']).'"><i class="fas fa-download"></i></button>';
                     } else {
-                        // Prova a ricostruire il download per file generati al volo
+                        // Prova a rigenerare il file se non esiste fisicamente
                         $download = '<form method="get" action="reports.php" class="d-inline">
-                            <input type="hidden" name="export" value="'.htmlspecialchars($exp['export_type']).'">
-                            <input type="hidden" name="view" value="'.htmlspecialchars($exp['export_view']).'">
-                            <input type="hidden" name="month" value="'.htmlspecialchars($exp['export_month']).'">
-                            <input type="hidden" name="year" value="'.htmlspecialchars($exp['export_year']).'">
-                            <input type="hidden" name="category" value="'.htmlspecialchars($exp['export_category']).'">
-                            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></button>
-                        </form>';
+        <input type="hidden" name="export" value="' . htmlspecialchars($exp['export_type']) . '">
+        <input type="hidden" name="view" value="' . htmlspecialchars($exp['export_view']) . '">
+        <input type="hidden" name="month" value="' . htmlspecialchars($exp['export_month']) . '">
+        <input type="hidden" name="year" value="' . htmlspecialchars($exp['export_year']) . '">
+        <input type="hidden" name="category" value="' . htmlspecialchars($exp['export_category']) . '">
+        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></button>
+    </form>';
                     }
                     echo '<tr>';
                     echo '<td>'.date('d/m/Y H:i', strtotime($exp['created_at'] ?? $exp['timestamp'] ?? 'now')).'</td>';
@@ -1072,6 +1073,26 @@ include 'header.php';
 </div>
 
 <script>
+// Download report dalla cronologia con AJAX
+function downloadReportAjax(downloadUrl, fileName) {
+    fetch(downloadUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Errore nel download');
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(() => alert('Errore durante il download del file.'));
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Inizializza i grafici in base al tipo di report
     <?php if ($view == 'monthly') { ?>
@@ -1096,6 +1117,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Grafico trend annuale
     initYearlyTrendChart();
     <?php } ?>
+    
+    // Gestione click download AJAX dalla cronologia
+    document.querySelectorAll('.download-ajax').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = btn.getAttribute('data-url');
+            const file = btn.getAttribute('data-filename');
+            downloadReportAjax(url, file);
+        });
+    });
 });
 
 // Grafico spese per categoria (report mensile)
