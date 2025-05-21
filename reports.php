@@ -83,7 +83,7 @@ if (isset($_GET['export'])) {
     }
     if ($export_type == 'csv') {
         $file_name = "report-".date('Ymd-His').".csv";
-        $file_path = $exports_dir . "/$file_name";
+        $file_path = "{$exports_dir}/{$file_name}";
         $download_url = 'exports/' . $file_name;
         $out = fopen($file_path, 'w');
         fputcsv($out, ['Data','Descrizione','Categoria','Tipo','Importo']);
@@ -135,9 +135,12 @@ if (isset($_GET['export'])) {
             echo 'Errore: libreria FPDF non disponibile. Verifica l\'installazione con composer require setasign/fpdf';
             exit;
         }        // Definizione della classe per il report PDF con compatibilità PHP
-        class PDFReport extends FPDF {
+        // Import the FPDF namespace
+        use setasign\Fpdf\Fpdf;
+
+        class PDFReport extends Fpdf {
             // Header della pagina
-            function Header() {
+            public function Header() {
                 $this->SetFillColor(0,123,255);
                 $this->Rect(0,0,210,30,'F');
                 if (file_exists(__DIR__.'/assets/img/logo-192.png')) {
@@ -147,7 +150,7 @@ if (isset($_GET['export'])) {
                 $this->SetTextColor(255,255,255);
                 $this->Cell(0,15,'AGTool Finance - Report Proforma',0,1,'C');
                 $this->Ln(2);
-            }
+            public function Footer() {
             
             // Footer della pagina
             function Footer() {
@@ -155,7 +158,7 @@ if (isset($_GET['export'])) {
                 $this->SetFont('Arial','I',8);
                 $this->SetTextColor(150,150,150);
                 $this->Cell(0,10,'Generato il '.date('d/m/Y H:i').' - Pagina '.$this->PageNo().'/{nb}',0,0,'C');
-            }
+            public function TableHeader() {
             
             // Intestazione della tabella
             function TableHeader() {
@@ -167,7 +170,7 @@ if (isset($_GET['export'])) {
                 $this->Cell(40,10,'Categoria',1,0,'C',true);
                 $this->Cell(20,10,'Tipo',1,0,'C',true);
                 $this->Cell(30,10,'Importo',1,1,'C',true);
-            }
+            public function TableRow($row) {
             
             // Riga della tabella
             function TableRow($row) {
@@ -178,11 +181,14 @@ if (isset($_GET['export'])) {
                 $description = mb_convert_encoding($row['description'], 'ISO-8859-1', 'UTF-8');
                 $category = mb_convert_encoding($row['category'], 'ISO-8859-1', 'UTF-8');
                 
-                $this->Cell(60,9,$description,1,0,'L');
-                $this->Cell(40,9,$category,1,0,'L');
-                
-                if ($row['type'] == 'entrata') {
-                    $this->SetTextColor(40,167,69);
+                switch ($row['type']) {
+                    case 'entrata':
+                        $this->SetTextColor(40,167,69);
+                        break;
+                    default:
+                        $this->SetTextColor(220,53,69);
+                        break;
+                }
                 } else {
                     $this->SetTextColor(220,53,69);
                 }
