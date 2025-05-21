@@ -24,7 +24,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $name = clean_input($_POST['name']);
     $type = clean_input($_POST['type']);
     $color = clean_input($_POST['color']);
-    $fixed_expense = isset($_POST['fixed_expense']) ? 1 : 0;
     
     // Verifica se la categoria esiste già
     $sql_check = "SELECT * FROM categories WHERE name = '$name' AND type = '$type'";
@@ -33,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     if ($result_check->num_rows > 0) {
         $error = "La categoria esiste già per questo tipo";
     } else {
-        $sql = "INSERT INTO categories (name, type, color, fixed_expense) VALUES ('$name', '$type', '$color', $fixed_expense)";
+        $sql = "INSERT INTO categories (name, type, color) VALUES ('$name', '$type', '$color')";
         
         if ($conn->query($sql) === TRUE) {
             header("Location: categories?status=success&message=" . urlencode("Categoria aggiunta con successo"));
@@ -74,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $id = intval($_POST['id']);
     $name = clean_input($_POST['name']);
     $color = clean_input($_POST['color']);
-    $fixed_expense = isset($_POST['fixed_expense']) ? 1 : 0;
     
     // Ottieni il tipo e il nome originale per poter aggiornare anche le transazioni
     $sql_original = "SELECT name, type FROM categories WHERE id = $id";
@@ -82,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $original = $result_original->fetch_assoc();
     
     // Aggiorna la categoria
-    $sql = "UPDATE categories SET name = '$name', color = '$color', fixed_expense = $fixed_expense WHERE id = $id";
+    $sql = "UPDATE categories SET name = '$name', color = '$color' WHERE id = $id";
     
     if ($conn->query($sql) === TRUE) {
         // Aggiorna anche le transazioni che usano questa categoria
@@ -138,7 +136,6 @@ include 'header.php';
                                 <th style="width: 10px">#</th>
                                 <th>Nome</th>
                                 <th>Colore</th>
-                                <th>Spesa fissa</th>
                                 <th style="width: 100px">Azioni</th>
                             </tr>
                         </thead>
@@ -154,9 +151,8 @@ include 'header.php';
                                     echo "<td>{$i}</td>";
                                     echo "<td>{$row['name']}</td>";
                                     echo "<td><span class='badge' style='background-color: {$row['color']}'>&nbsp;</span> {$row['color']}</td>";
-                                    echo "<td>" . ($row['fixed_expense'] ? '<span class="badge badge-warning">Fissa</span>' : '<span class="badge badge-secondary">Variabile</span>') . "</td>";
                                     echo "<td>";
-                                    echo "<button class='btn btn-sm btn-info edit-category' data-id='{$row['id']}' data-name='{$row['name']}' data-color='{$row['color']}' data-fixed='{$row['fixed_expense']}'><i class='fas fa-edit'></i></button> ";
+                                    echo "<button class='btn btn-sm btn-info edit-category' data-id='{$row['id']}' data-name='{$row['name']}' data-color='{$row['color']}'><i class='fas fa-edit'></i></button> ";
                                     echo "<a href='categories?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa categoria?\")'>
                                           <i class='fas fa-trash'></i></a>";
                                     echo "</td>";
@@ -191,7 +187,6 @@ include 'header.php';
                                 <th style="width: 10px">#</th>
                                 <th>Nome</th>
                                 <th>Colore</th>
-                                <th>Spesa fissa</th>
                                 <th style="width: 100px">Azioni</th>
                             </tr>
                         </thead>
@@ -207,9 +202,8 @@ include 'header.php';
                                     echo "<td>{$i}</td>";
                                     echo "<td>{$row['name']}</td>";
                                     echo "<td><span class='badge' style='background-color: {$row['color']}'>&nbsp;</span> {$row['color']}</td>";
-                                    echo "<td>" . ($row['fixed_expense'] ? '<span class="badge badge-warning">Fissa</span>' : '<span class="badge badge-secondary">Variabile</span>') . "</td>";
                                     echo "<td>";
-                                    echo "<button class='btn btn-sm btn-info edit-category' data-id='{$row['id']}' data-name='{$row['name']}' data-color='{$row['color']}' data-fixed='{$row['fixed_expense']}'><i class='fas fa-edit'></i></button> ";
+                                    echo "<button class='btn btn-sm btn-info edit-category' data-id='{$row['id']}' data-name='{$row['name']}' data-color='{$row['color']}'><i class='fas fa-edit'></i></button> ";
                                     echo "<a href='categories?delete={$row['id']}' class='btn btn-sm btn-danger' onclick='return confirm(\"Sei sicuro di voler eliminare questa categoria?\")'>
                                           <i class='fas fa-trash'></i></a>";
                                     echo "</td>";
@@ -320,12 +314,6 @@ include 'header.php';
                         <label for="category-color">Colore</label>
                         <input type="color" id="category-color" name="color" class="form-control" value="#3498db">
                     </div>
-                    <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="category-fixed-expense" name="fixed_expense" value="1">
-                            <label class="custom-control-label" for="category-fixed-expense">Spesa fissa (es. affitto, bollette, abbonamenti)</label>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
@@ -357,12 +345,6 @@ include 'header.php';
                     <div class="form-group">
                         <label for="edit-category-color">Colore</label>
                         <input type="color" id="edit-category-color" name="color" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="edit-category-fixed-expense" name="fixed_expense" value="1">
-                            <label class="custom-control-label" for="edit-category-fixed-expense">Spesa fissa (es. affitto, bollette, abbonamenti)</label>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -487,12 +469,10 @@ document.addEventListener('DOMContentLoaded', function() {
         var id = $(this).data('id');
         var name = $(this).data('name');
         var color = $(this).data('color');
-        var fixed = $(this).data('fixed');
         
         $('#edit-category-id').val(id);
         $('#edit-category-name').val(name);
         $('#edit-category-color').val(color);
-        $('#edit-category-fixed-expense').prop('checked', fixed == 1);
         
         $('#editCategoryModal').modal('show');
     });

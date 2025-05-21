@@ -213,51 +213,7 @@ if (isset($_GET['export'])) {
     }
 }
 
-// Impostazione dei filtri
-$view = isset($_GET['view']) ? clean_input($_GET['view']) : 'monthly';
-$month = isset($_GET['month']) ? intval($_GET['month']) : date('m');
-$year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-$category = isset($_GET['category']) ? clean_input($_GET['category']) : '';
-
-// Funzione per ottenere il nome del mese
-function get_month_name($month_number) {
-    $months = [
-        1 => 'Gennaio',
-        2 => 'Febbraio',
-        3 => 'Marzo',
-        4 => 'Aprile',
-        5 => 'Maggio',
-        6 => 'Giugno',
-        7 => 'Luglio',
-        8 => 'Agosto',
-        9 => 'Settembre',
-        10 => 'Ottobre',
-        11 => 'Novembre',
-        12 => 'Dicembre'
-    ];
-    return $months[$month_number] ?? '';
-}
-
-// Includi l'header
-include 'header.php';
-?>
-
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0 text-dark">Reportistica</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="index">Home</a></li>
-                    <li class="breadcrumb-item active">Reportistica</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
-
+// --- CRONOLOGIA ESPORTAZIONI ---
 <div class="container-fluid">
     <!-- Cronologia esportazioni -->
     <div class="card mb-4">
@@ -299,7 +255,6 @@ include 'header.php';
                     if (!empty($exp['download_url']) && file_exists(__DIR__ . '/' . $exp['download_url'])) {
                         $download = '<button type="button" class="btn btn-sm btn-outline-primary download-ajax" data-url="'.htmlspecialchars($exp['download_url']).'" data-filename="'.htmlspecialchars($exp['file_name']).'"><i class="fas fa-download"></i></button>';
                     } else {
-                        // Prova a rigenerare il file se non esiste fisicamente
                         $download = '<form method="get" action="reports.php" class="d-inline">
         <input type="hidden" name="export" value="' . htmlspecialchars($exp['export_type']) . '">
         <input type="hidden" name="view" value="' . htmlspecialchars($exp['export_view']) . '">
@@ -473,19 +428,13 @@ include 'header.php';
                       WHERE type = 'entrata' AND MONTH(date) = $month AND YEAR(date) = $year";
         $sql_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
                        WHERE type = 'uscita' AND MONTH(date) = $month AND YEAR(date) = $year";
-        $sql_fixed_expense = "SELECT COALESCE(SUM(t.amount), 0) as total FROM transactions t
-    LEFT JOIN categories c ON t.category = c.name AND t.type = c.type
-    WHERE t.type = 'uscita' AND c.fixed_expense = 1 AND MONTH(t.date) = $month AND YEAR(t.date) = $year";
-
+        
         $result_income = $conn->query($sql_income);
         $result_expense = $conn->query($sql_expense);
-        $result_fixed_expense = $conn->query($sql_fixed_expense);
         
         $income = $result_income->fetch_assoc()['total'];
         $expense = $result_expense->fetch_assoc()['total'];
-        $fixed_expense = $result_fixed_expense->fetch_assoc()['total'];
         $savings = $income - $expense;
-        $real_savings = $income - $fixed_expense;
     ?>
     
     <div class="row">
@@ -515,18 +464,11 @@ include 'header.php';
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="info-box bg-info">
+                            <div class="info-box <?php echo $savings >= 0 ? 'bg-info' : 'bg-warning'; ?>">
                                 <span class="info-box-icon"><i class="fas fa-wallet"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Saldo Netto</span>
+                                    <span class="info-box-text">Risparmio Mensile</span>
                                     <span class="info-box-number"><?php echo format_currency($savings); ?></span>
-                                </div>
-                            </div>
-                            <div class="info-box bg-warning mt-2">
-                                <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Risparmio Reale (dopo spese fisse)</span>
-                                    <span class="info-box-number"><?php echo format_currency($real_savings); ?></span>
                                 </div>
                             </div>
                         </div>
