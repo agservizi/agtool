@@ -40,4 +40,12 @@ function format_currency($amount) {
 if (!getenv('SMTP_HOST')) putenv('SMTP_HOST=smtp.gmail.com');
 if (!getenv('SMTP_USER')) putenv('SMTP_USER=ag.servizi16@gmail.com');
 if (!getenv('SMTP_PASS')) putenv('SMTP_PASS=Giogiu2123@');
+
+// Chiavi VAPID per notifiche push browser
+// Genera le tue chiavi con:
+// ./vendor/bin/web-push generate:vapid
+// e incollale qui
+
+define('VAPID_PUBLIC_KEY', 'BAze-RF--Ghfm6-Sj3242JBknltGkUASrKYWtWz997qFZDaNy3NzvHYxC41nkkXOsA09qr8bUJusR38PQh_Rw60');
+define('VAPID_PRIVATE_KEY', '5UxfwJ4zOs7w6mY3lrQpElRSmJvy7NLKJyXHs4OUeBo');
 ?>

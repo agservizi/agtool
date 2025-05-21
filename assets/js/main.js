@@ -632,3 +632,73 @@ function runRecurringAjax() {
         })
         .catch(() => showToast('error', 'Errore di connessione con il server'));
 }
+
+/**
+ * Notifiche Push Browser
+ */
+function initPushNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Push notifications non supportate');
+        return;
+    }
+    // Registra il Service Worker
+    navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+            // Chiedi permesso all'utente
+            return Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                    subscribeUserToPush(registration);
+                } else {
+                    console.log('Permesso notifiche negato');
+                }
+            });
+        })
+        .catch(function(error) {
+            console.error('Errore Service Worker:', error);
+        });
+}
+
+function subscribeUserToPush(registration) {
+    // Recupera la chiave pubblica VAPID dal server
+    fetch('get_vapid_public_key.php')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            const applicationServerKey = urlBase64ToUint8Array(data.publicKey);
+            registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey
+            })
+            .then(function(subscription) {
+                // Invia la subscription al server
+                fetch('save_push_subscription.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
+            })
+            .catch(function(err) {
+                console.error('Errore sottoscrizione push:', err);
+            });
+        });
+}
+
+// Utility per convertire la chiave VAPID
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+// Avvia la registrazione push all'avvio
+if (window.location.pathname !== '/login.php') {
+    document.addEventListener('DOMContentLoaded', function () {
+        initPushNotifications();
+    });
+}
