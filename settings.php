@@ -138,15 +138,23 @@ function ajaxSettings(formId, action, successMsg) {
         fetch('save_settings.php', {
             method: 'POST',
             body: formData
-        });
+        })
         .then(r => r.json())
         .then((data) => {
-            if(data.status==='success') showToast('success', successMsg || data.message);
-            else showToast('error', data.message);
+            if(data.status==='success') {
+                showToast('success', successMsg || data.message);
+                // Aggiorna il campo email nel form se è stato aggiornato
+                if(action==='profile') {
+                    const emailInput = document.querySelector('input[name="email"]');
+                    if(emailInput && formData.get('email')) emailInput.value = formData.get('email');
+                }
+            } else {
+                showToast('error', data.message);
+            }
             if(action==='delete_account' && data.status==='success') setTimeout(()=>window.location='login',1500);
         })
         .catch(()=>showToast('error','Errore di rete'));
-    };
+    });
 }
 ajaxSettings('profile-form','profile','Profilo aggiornato!');
 ajaxSettings('preferences-form','preferences','Preferenze salvate!');
