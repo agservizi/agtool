@@ -11,7 +11,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Gestisci i messaggi flash
     handleFlashMessages();
+
+    // Controlla notifiche automatiche
+    checkAutoNotifications();
 });
+
+/**
+ * Controlla notifiche automatiche (limiti, obiettivi, ricorrenze)
+ */
+function checkAutoNotifications() {
+    fetch('check_notifications.php', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'ok' && data.notifiche && data.notifiche.length > 0) {
+                data.notifiche.forEach(function(msg) { showToast('info', msg); });
+            }
+        })
+        .catch(function() {});
+}
 
 /**
  * Inizializza il form delle transazioni
