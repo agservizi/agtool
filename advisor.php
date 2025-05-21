@@ -78,7 +78,7 @@ function get_ai_advice_from_openrouter($question, $user_context = '') {
     ];
     
     $data = [
-        'model' => 'deepseek/deepseek-r1:free',
+        'model' => 'deepseek/deepseek-chat:free', // Modello aggiornato come richiesto
         'messages' => $messages,
         'max_tokens' => 512,
         'temperature' => 0.7
