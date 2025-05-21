@@ -62,7 +62,8 @@ function generate_saving_advice($amount, $period, $frequency) {
 
 // Funzione per ottenere un consiglio AI da OpenRouter DeepSeek
 function get_ai_advice_from_openrouter($question, $user_context = '') {
-    $api_key = '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';
+    global $OPENROUTER_API_KEY;
+    $api_key = $OPENROUTER_API_KEY;
     $url = 'https://openrouter.ai/api/v1/chat/completions';
     
     $messages = [
