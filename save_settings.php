@@ -61,6 +61,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['status'=>'success','message'=>'Account eliminato']);
         exit;
     }
+    if ($action === 'profile') {
+        $email = clean_input($_POST['email'] ?? '');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['status'=>'error','message'=>'Email non valida']);
+            exit;
+        }
+        $sql = "UPDATE users SET email = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('si', $email, $user_id);
+        $stmt->execute();
+        $stmt->close();
+        echo json_encode(['status'=>'success','message'=>'Email aggiornata']);
+        exit;
+    }
 }
 echo json_encode(['status'=>'error','message'=>'Richiesta non valida']);
 ?>

@@ -56,7 +56,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $msg = "Hai registrato una spesa di " . format_currency($amount) . ": '" . $description . "'.";
                     $notif_stmt->bind_param('isss', $user_id, $title, $msg, $date);
                     $notif_stmt->execute();
+                    $notification_id = $notif_stmt->insert_id;
                     $notif_stmt->close();
+                    // Invio email se abilitato
+                    $settings_stmt = $conn->prepare("SELECT email_notifications FROM user_settings WHERE user_id = ?");
+                    $settings_stmt->bind_param('i', $user_id);
+                    $settings_stmt->execute();
+                    $settings_stmt->bind_result($email_notifications);
+                    $settings_stmt->fetch();
+                    $settings_stmt->close();
+                    $email_stmt = $conn->prepare("SELECT email FROM users WHERE id = ?");
+                    $email_stmt->bind_param('i', $user_id);
+                    $email_stmt->execute();
+                    $email_stmt->bind_result($user_email);
+                    $email_stmt->fetch();
+                    $email_stmt->close();
+                    if ($email_notifications && filter_var($user_email, FILTER_VALIDATE_EMAIL)) {
+                        require_once 'inc/send_notification_email.php';
+                        $sent = send_notification_email($user_email, $title, $msg);
+                        $status = $sent ? 'sent' : 'failed';
+                        $update_stmt = $conn->prepare("UPDATE notifications SET status = ?, sent_at = NOW() WHERE id = ?");
+                        $update_stmt->bind_param('si', $status, $notification_id);
+                        $update_stmt->execute();
+                        $update_stmt->close();
+                    }
                 }
                 $user_stmt->close();
             }
@@ -78,8 +101,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         exit;
     }
-    
-    $stmt->close();
 } else {
     // Richiesta non valida
     if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {

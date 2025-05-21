@@ -6,7 +6,7 @@ if (!isset($_SESSION['user_phone'])) {
     exit;
 }
 $phone = $_SESSION['user_phone'];
-$stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+$stmt = $conn->prepare("SELECT id, email FROM users WHERE phone = ?");
 $stmt->bind_param('s', $phone);
 $stmt->execute();
 $stmt->store_result();
@@ -17,6 +17,8 @@ if ($stmt->num_rows === 0) {
     header('Location: login');
     exit;
 }
+$stmt->bind_result($user_id, $user_email);
+$stmt->fetch();
 $stmt->close();
 
 include 'header.php';
@@ -39,13 +41,13 @@ include 'header.php';
                         </div>
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" class="form-control" name="email" value="" placeholder="(in sviluppo)" disabled>
+                            <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($user_email ?? ''); ?>" required>
                         </div>
                         <div class="form-group">
                             <label>Nuova Password</label>
                             <input type="password" class="form-control" name="password" placeholder="(in sviluppo)" disabled>
                         </div>
-                        <button type="submit" class="btn btn-primary" disabled>Salva Profilo</button>
+                        <button type="submit" class="btn btn-primary">Salva Profilo</button>
                     </form>
                 </div>
             </div>
@@ -138,6 +140,7 @@ function ajaxSettings(formId, action, successMsg) {
         .catch(()=>showToast('error','Errore di rete'));
     });
 }
+ajaxSettings('profile-form','profile','Profilo aggiornato!');
 ajaxSettings('preferences-form','preferences','Preferenze salvate!');
 ajaxSettings('limit-form','limit','Limite salvato!');
 ajaxSettings('notifications-form','notifications','Notifiche salvate!');

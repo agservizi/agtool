@@ -35,4 +35,9 @@ function format_date($date) {
 function format_currency($amount) {
     return number_format($amount, 2, ',', '.') . ' €';
 }
+
+// Impostazioni SMTP di produzione (solo se non già definite nell'ambiente)
+if (!getenv('SMTP_HOST')) putenv('SMTP_HOST=smtp.gmail.com');
+if (!getenv('SMTP_USER')) putenv('SMTP_USER=ag.servizi16@gmail.com');
+if (!getenv('SMTP_PASS')) putenv('SMTP_PASS=Giogiu2123@');
 ?>
