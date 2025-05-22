@@ -392,8 +392,11 @@ $stmt->close();
                                 </div>
                                 <div class="card-body p-0">
                                     <?php
-                                    $sql = "SELECT * FROM savings_goals WHERE user_phone='".$conn->real_escape_string($phone)."' ORDER BY target_date ASC";
-                                    $result = $conn->query($sql);
+                                    $sql = "SELECT * FROM savings_goals WHERE user_id = ? ORDER BY target_date ASC";
+                                    $stmt = $conn->prepare($sql);
+                                    $stmt->bind_param('i', $user_id);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
                                     if ($result && $result->num_rows > 0) {
                                         while($row = $result->fetch_assoc()) {
                                             $percentage = ($row['target_amount'] > 0) ? ($row['current_amount'] / $row['target_amount']) * 100 : 0;
@@ -418,6 +421,7 @@ $stmt->close();
                                     } else {
                                         echo '<div class="p-3 text-center">Nessun obiettivo di risparmio. Aggiungi il tuo primo obiettivo!</div>';
                                     }
+                                    $stmt->close();
                                     ?>
                                 </div>
                             </div>
