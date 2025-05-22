@@ -1073,26 +1073,6 @@ include 'header.php';
 </div>
 
 <script>
-// Download report dalla cronologia con AJAX
-function downloadReportAjax(downloadUrl, fileName) {
-    fetch(downloadUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Errore nel download');
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(() => alert('Errore durante il download del file.'));
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     // Inizializza i grafici in base al tipo di report
     <?php if ($view == 'monthly') { ?>
@@ -1117,16 +1097,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Grafico trend annuale
     initYearlyTrendChart();
     <?php } ?>
-    
-    // Gestione click download AJAX dalla cronologia
-    document.querySelectorAll('.download-ajax').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const url = btn.getAttribute('data-url');
-            const file = btn.getAttribute('data-filename');
-            downloadReportAjax(url, file);
-        });
-    });
 });
 
 // Grafico spese per categoria (report mensile)
