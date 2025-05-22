@@ -212,253 +212,240 @@ $stmt->close();
 
             <!-- Main content -->
             <section class="content">
-                <div class="container-fluid">
-                    <!-- Statistiche principali -->
-                    <div class="row">
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-info">
-                                <div class="inner">
-                                    <?php
-                                    // Statistiche utente
-                                    $income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
-                                    $expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
-                                    $balance = $income - $expense;
-                                    ?>
-                                    <h3><?php echo format_currency($balance); ?></h3>
-                                    <p>Bilancio Totale</p>
-                                </div>
-                                <div class="icon"><i class="fas fa-wallet"></i></div>
-                                <a href="transactions" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-success">
-                                <div class="inner">
-                                    <h3><?php echo format_currency($income); ?></h3>
-                                    <p>Entrate Totali</p>
-                                </div>
-                                <div class="icon"><i class="fas fa-arrow-up"></i></div>
-                                <a href="transactions?type=entrata" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-danger">
-                                <div class="inner">
-                                    <h3><?php echo format_currency($expense); ?></h3>
-                                    <p>Uscite Totali</p>
-                                </div>
-                                <div class="icon"><i class="fas fa-arrow-down"></i></div>
-                                <a href="transactions?type=uscita" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-warning">
-                                <div class="inner">
-                                    <?php
-                                    $m = date('m'); $y = date('Y');
-                                    $monthly_income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND user_phone='".$conn->real_escape_string($phone)."' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
-                                    $monthly_expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
-                                    $monthly_savings = $monthly_income - $monthly_expense;
-                                    ?>
-                                    <h3><?php echo format_currency($monthly_savings); ?></h3>
-                                    <p>Risparmio del Mese</p>
-                                </div>
-                                <div class="icon"><i class="fas fa-piggy-bank"></i></div>
-                                <a href="reports?view=monthly" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
-                            </div>
-                        </div>
+    <div class="container-fluid">
+        <!-- Statistiche principali -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3><?php echo format_currency($balance); ?></h3>
+                        <p>Bilancio Totale</p>
                     </div>
-                    <!-- /.row -->
+                    <div class="icon"><i class="fas fa-wallet"></i></div>
+                    <a href="transactions" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3><?php echo format_currency($income); ?></h3>
+                        <p>Entrate Totali</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-arrow-up"></i></div>
+                    <a href="transactions?type=entrata" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3><?php echo format_currency($expense); ?></h3>
+                        <p>Uscite Totali</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-arrow-down"></i></div>
+                    <a href="transactions?type=uscita" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3><?php echo format_currency($monthly_savings); ?></h3>
+                        <p>Risparmio del Mese</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-piggy-bank"></i></div>
+                    <a href="reports?view=monthly" class="small-box-footer">Maggiori dettagli <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
 
-                    <div class="row">
-                        <!-- Colonna sinistra: Transazioni recenti e Consulente -->
-                        <section class="col-lg-7 connectedSortable">
-                            <div class="card">
-                                <div class="card-header border-0">
-                                    <h3 class="card-title">Transazioni Recenti</h3>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-valign-middle">
-                                            <thead>
-                                                <tr>
-                                                    <th>Data</th>
-                                                    <th>Descrizione</th>
-                                                    <th>Categoria</th>
-                                                    <th>Importo</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $sql = "SELECT t.*, c.name as category_name, c.color FROM transactions t LEFT JOIN categories c ON t.category = c.name AND t.type = c.type WHERE t.user_phone='".$conn->real_escape_string($phone)."' ORDER BY t.date DESC LIMIT 10";
-                                                $result = $conn->query($sql);
-                                                if ($result && $result->num_rows > 0) {
-                                                    while($row = $result->fetch_assoc()) {
-                                                        $color_class = ($row['type'] == 'entrata') ? 'text-success' : 'text-danger';
-                                                        $amount_sign = ($row['type'] == 'entrata') ? '+' : '-';
-                                                        $amount = $amount_sign . ' ' . format_currency($row['amount']);
-                                                        $date = format_date($row['date']);
-                                                        $category_color = $row['color'] ?? '#3498db';
-                                                        $category_name = $row['category_name'] ?? $row['category'];
-                                                        echo "<tr>";
-                                                        echo "<td>{$date}</td>";
-                                                        echo "<td>{$row['description']}</td>";
-                                                        echo "<td><span class='badge' style='background-color: {$category_color}'>{$category_name}</span></td>";
-                                                        echo "<td class='{$color_class}'>{$amount}</td>";
-                                                        echo "</tr>";
-                                                    }
-                                                } else {
-                                                    echo "<tr><td colspan='4' class='text-center'>Nessuna transazione trovata</td></tr>";
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="card-footer text-center">
-                                    <a href="transactions" class="uppercase">Vedi Tutte le Transazioni</a>
-                                </div>
-                            </div>
-                            <!-- Consulente -->
-                            <div class="card direct-chat direct-chat-primary">
-                                <div class="card-header">
-                                    <h3 class="card-title">Consulente</h3>
-                                </div>
-                                <div class="card-body" id="financial-advisor">
-                                    <div class="direct-chat-messages" id="advisor-messages">
-                                        <div class="direct-chat-msg">
-                                            <div class="direct-chat-infos clearfix">
-                                                <span class="direct-chat-name float-left">Consulente</span>
-                                            </div>
-                                            <div class="direct-chat-img bg-info rounded-circle d-flex justify-content-center align-items-center">
-                                                <i class="fas fa-robot"></i>
-                                            </div>
-                                            <div class="direct-chat-text">
-                                                <?php
-                                                $sql = "SELECT * FROM financial_tips WHERE is_active = 1 ORDER BY RAND() LIMIT 1";
-                                                $result = $conn->query($sql);
-                                                if ($result && $result->num_rows > 0) {
-                                                    $tip = $result->fetch_assoc();
-                                                    echo "<strong>{$tip['title']}</strong><br>";
-                                                    echo $tip['description'];
-                                                } else {
-                                                    echo "Benvenuto in AGTool Finance! Inizia a registrare le tue transazioni per ricevere consigli finanziari personalizzati.";
-                                                }
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <div class="input-group">
-                                        <input type="text" id="advisor-question" name="message" placeholder="Fai una domanda al consulente..." class="form-control">
-                                        <span class="input-group-append">
-                                            <button type="button" id="ask-advisor" class="btn btn-primary">Invia</button>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        <!-- Colonna destra: Grafico, Obiettivi, Simulatore -->
-                        <section class="col-lg-5 connectedSortable">
-                            <div class="card">
-                                <div class="card-header border-0">
-                                    <h3 class="card-title">Entrate vs Uscite</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="position-relative mb-4">
-                                        <canvas id="income-expense-chart" height="250"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-header border-0">
-                                    <h3 class="card-title">Obiettivi di risparmio</h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addGoalModal">
-                                            <i class="fas fa-plus"></i> Nuovo obiettivo
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body p-0">
+        <div class="row">
+            <!-- Colonna sinistra: Transazioni recenti e Consulente -->
+            <section class="col-lg-7 connectedSortable">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <h3 class="card-title">Transazioni Recenti</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-valign-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrizione</th>
+                                        <th>Categoria</th>
+                                        <th>Importo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     <?php
-                                    $sql = "SELECT * FROM savings_goals WHERE user_id = ? ORDER BY target_date ASC";
-                                    $stmt = $conn->prepare($sql);
-                                    $stmt->bind_param('i', $user_id);
-                                    $stmt->execute();
-                                    $result = $stmt->get_result();
+                                    $sql = "SELECT t.*, c.name as category_name, c.color FROM transactions t LEFT JOIN categories c ON t.category = c.name AND t.type = c.type WHERE t.user_phone='".$conn->real_escape_string($phone)."' ORDER BY t.date DESC LIMIT 10";
+                                    $result = $conn->query($sql);
                                     if ($result && $result->num_rows > 0) {
                                         while($row = $result->fetch_assoc()) {
-                                            $percentage = ($row['target_amount'] > 0) ? ($row['current_amount'] / $row['target_amount']) * 100 : 0;
-                                            $percentage = min(100, $percentage);
-                                            $date_text = $row['target_date'] ? 'entro il ' . format_date($row['target_date']) : '';
-                                    ?>
-                                    <div class="p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h4 class="m-0"><?php echo $row['name']; ?></h4>
-                                            <span><?php echo format_currency($row['current_amount']); ?> / <?php echo format_currency($row['target_amount']); ?></span>
-                                        </div>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $percentage; ?>%" aria-valuenow="<?php echo $percentage; ?>" aria-valuemin="0" aria-valuemax="100">
-                                                <?php echo round($percentage, 1); ?>%
-                                            </div>
-                                        </div>
-                                        <small class="text-muted"><?php echo $date_text; ?></small>
-                                    </div>
-                                    <div class="dropdown-divider"></div>
-                                    <?php
+                                            $color_class = ($row['type'] == 'entrata') ? 'text-success' : 'text-danger';
+                                            $amount_sign = ($row['type'] == 'entrata') ? '+' : '-';
+                                            $amount = $amount_sign . ' ' . format_currency($row['amount']);
+                                            $date = format_date($row['date']);
+                                            $category_color = $row['color'] ?? '#3498db';
+                                            $category_name = $row['category_name'] ?? $row['category'];
+                                            echo "<tr>";
+                                            echo "<td>{$date}</td>";
+                                            echo "<td>{$row['description']}</td>";
+                                            echo "<td><span class='badge' style='background-color: {$category_color}'>{$category_name}</span></td>";
+                                            echo "<td class='{$color_class}'>{$amount}</td>";
+                                            echo "</tr>";
                                         }
                                     } else {
-                                        echo '<div class="p-3 text-center">Nessun obiettivo di risparmio. Aggiungi il tuo primo obiettivo!</div>';
+                                        echo "<tr><td colspan='4' class='text-center'>Nessuna transazione trovata</td></tr>";
                                     }
-                                    $stmt->close();
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="transactions" class="uppercase">Vedi Tutte le Transazioni</a>
+                    </div>
+                </div>
+                <!-- Consulente -->
+                <div class="card direct-chat direct-chat-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Consulente</h3>
+                    </div>
+                    <div class="card-body" id="financial-advisor">
+                        <div class="direct-chat-messages" id="advisor-messages">
+                            <div class="direct-chat-msg">
+                                <div class="direct-chat-infos clearfix">
+                                    <span class="direct-chat-name float-left">Consulente</span>
+                                </div>
+                                <div class="direct-chat-img bg-info rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="direct-chat-text">
+                                    <?php
+                                    $sql = "SELECT * FROM financial_tips WHERE is_active = 1 ORDER BY RAND() LIMIT 1";
+                                    $result = $conn->query($sql);
+                                    if ($result && $result->num_rows > 0) {
+                                        $tip = $result->fetch_assoc();
+                                        echo "<strong>{$tip['title']}</strong><br>";
+                                        echo $tip['description'];
+                                    } else {
+                                        echo "Benvenuto in AGTool Finance! Inizia a registrare le tue transazioni per ricevere consigli finanziari personalizzati.";
+                                    }
                                     ?>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Simulatore di Risparmio</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="saving-amount">Importo da risparmiare:</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">€</span>
-                                            </div>
-                                            <input type="number" id="saving-amount" class="form-control" value="100">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="saving-frequency">Frequenza:</label>
-                                        <select id="saving-frequency" class="form-control">
-                                            <option value="daily">Giornaliera</option>
-                                            <option value="weekly">Settimanale</option>
-                                            <option value="monthly" selected>Mensile</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="saving-period">Periodo (mesi):</label>
-                                        <input type="range" id="saving-period" class="form-control" min="1" max="60" value="12" oninput="document.getElementById('period-value').innerHTML = this.value">
-                                        <span id="period-value">12</span> mesi
-                                    </div>
-                                    <button type="button" id="calculate-savings" class="btn btn-primary btn-block">Calcola</button>
-                                    
-                                    <div id="savings-result" class="mt-3 text-center" style="display: none;">
-                                        <h4>Risultato:</h4>
-                                        <div class="alert alert-success">
-                                            Risparmiando <span id="result-amount"></span>€ <span id="result-frequency"></span>,
-                                            in <span id="result-period"></span> mesi avrai risparmiato:
-                                            <h3 id="result-total"></h3>
-                                        </div>
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="input-group">
+                            <input type="text" id="advisor-question" name="message" placeholder="Fai una domanda al consulente..." class="form-control">
+                            <span class="input-group-append">
+                                <button type="button" id="ask-advisor" class="btn btn-primary">Invia</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Colonna destra: Grafico, Obiettivi, Simulatore -->
+            <section class="col-lg-5 connectedSortable">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <h3 class="card-title">Entrate vs Uscite</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="position-relative mb-4">
+                            <canvas id="income-expense-chart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header border-0">
+                        <h3 class="card-title">Obiettivi di risparmio</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addGoalModal">
+                                <i class="fas fa-plus"></i> Nuovo obiettivo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <?php
+                        $sql = "SELECT * FROM savings_goals WHERE user_id = ? ORDER BY target_date ASC";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bind_param('i', $user_id);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        if ($result && $result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                $percentage = ($row['target_amount'] > 0) ? ($row['current_amount'] / $row['target_amount']) * 100 : 0;
+                                $percentage = min(100, $percentage);
+                                $date_text = $row['target_date'] ? 'entro il ' . format_date($row['target_date']) : '';
+                        ?>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h4 class="m-0"><?php echo $row['name']; ?></h4>
+                                <span><?php echo format_currency($row['current_amount']); ?> / <?php echo format_currency($row['target_amount']); ?></span>
+                            </div>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $percentage; ?>%" aria-valuenow="<?php echo $percentage; ?>" aria-valuemin="0" aria-valuemax="100">
+                                    <?php echo round($percentage, 1); ?>%
                                 </div>
                             </div>
-                        </section>
+                            <small class="text-muted"><?php echo $date_text; ?></small>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <?php
+                            }
+                        } else {
+                            echo '<div class="p-3 text-center">Nessun obiettivo di risparmio. Aggiungi il tuo primo obiettivo!</div>';
+                        }
+                        $stmt->close();
+                        ?>
                     </div>
-                </div><!-- /.container-fluid -->
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Simulatore di Risparmio</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="saving-amount">Importo da risparmiare:</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                                <input type="number" id="saving-amount" class="form-control" value="100">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="saving-frequency">Frequenza:</label>
+                            <select id="saving-frequency" class="form-control">
+                                <option value="daily">Giornaliera</option>
+                                <option value="weekly">Settimanale</option>
+                                <option value="monthly" selected>Mensile</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="saving-period">Periodo (mesi):</label>
+                            <input type="range" id="saving-period" class="form-control" min="1" max="60" value="12" oninput="document.getElementById('period-value').innerHTML = this.value">
+                            <span id="period-value">12</span> mesi
+                        </div>
+                        <button type="button" id="calculate-savings" class="btn btn-primary btn-block">Calcola</button>
+                        <div id="savings-result" class="mt-3 text-center" style="display: none;">
+                            <h4>Risultato:</h4>
+                            <div class="alert alert-success">
+                                Risparmiando <span id="result-amount"></span>€ <span id="result-frequency"></span>,
+                                in <span id="result-period"></span> mesi avrai risparmiato:
+                                <h3 id="result-total"></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
-            <!-- /.content -->
+        </div>
+    </div>
+</section>
+<!-- /.content -->
         </div>
         <!-- /.content-wrapper -->
 
