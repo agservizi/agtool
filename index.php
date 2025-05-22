@@ -219,9 +219,7 @@ $stmt->close();
                             <div class="small-box bg-info">
                                 <div class="inner">
                                     <?php
-                                    require_once 'inc/config.php';
-                                    
-                                    // Bilancio totale SOLO per utente loggato
+                                    // Statistiche utente
                                     $income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
                                     $expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
                                     $balance = $income - $expense;
@@ -273,9 +271,8 @@ $stmt->close();
                     <!-- /.row -->
 
                     <div class="row">
-                        <!-- Colonna sinistra -->
+                        <!-- Colonna sinistra: Transazioni recenti e Consulente -->
                         <section class="col-lg-7 connectedSortable">
-                            <!-- Transazioni recenti -->
                             <div class="card">
                                 <div class="card-header border-0">
                                     <h3 class="card-title">Transazioni Recenti</h3>
@@ -322,9 +319,7 @@ $stmt->close();
                                     <a href="transactions" class="uppercase">Vedi Tutte le Transazioni</a>
                                 </div>
                             </div>
-                            <!-- /.card -->
-
-                            <!-- Consigliere Finanziario Card -->
+                            <!-- Consulente -->
                             <div class="card direct-chat direct-chat-primary">
                                 <div class="card-header">
                                     <h3 class="card-title">Consulente</h3>
@@ -363,11 +358,9 @@ $stmt->close();
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card -->
                         </section>
-                        <!-- Colonna destra -->
+                        <!-- Colonna destra: Grafico, Obiettivi, Simulatore -->
                         <section class="col-lg-5 connectedSortable">
-                            <!-- Grafico Entrate vs Uscite -->
                             <div class="card">
                                 <div class="card-header border-0">
                                     <h3 class="card-title">Entrate vs Uscite</h3>
@@ -378,9 +371,6 @@ $stmt->close();
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card -->
-
-                            <!-- Obiettivi di risparmio -->
                             <div class="card">
                                 <div class="card-header border-0">
                                     <h3 class="card-title">Obiettivi di risparmio</h3>
@@ -425,9 +415,6 @@ $stmt->close();
                                     ?>
                                 </div>
                             </div>
-                            <!-- /.card -->
-
-                            <!-- Simulatore di risparmio -->
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">Simulatore di Risparmio</h3>
@@ -467,7 +454,6 @@ $stmt->close();
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card -->
                         </section>
                     </div>
                 </div><!-- /.container-fluid -->
