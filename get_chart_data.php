@@ -112,6 +112,32 @@ if ($chart_type === 'daily_trend') {
     exit;
 }
 
+// Widget: andamento risparmio ultimi 12 mesi (per dashboard avanzata)
+if ($chart_type === 'savings_trend') {
+    $labels = [];
+    $savings = [];
+    $phone = isset($_SESSION['user_phone']) ? $conn->real_escape_string($_SESSION['user_phone']) : '';
+    for ($i = 11; $i >= 0; $i--) {
+        $month = date('m', strtotime("-$i months"));
+        $year = date('Y', strtotime("-$i months"));
+        $month_label = date('M Y', strtotime("$year-$month-01"));
+        $sql_income = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE type = 'entrata' AND MONTH(date) = $month AND YEAR(date) = $year AND user_phone = '$phone'";
+        $sql_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE type = 'uscita' AND MONTH(date) = $month AND YEAR(date) = $year AND user_phone = '$phone'";
+        $income = 0; $expense = 0;
+        $res_income = $conn->query($sql_income);
+        if($res_income) $income = $res_income->fetch_assoc()['total'];
+        $res_expense = $conn->query($sql_expense);
+        if($res_expense) $expense = $res_expense->fetch_assoc()['total'];
+        $labels[] = $month_label;
+        $savings[] = $income - $expense;
+    }
+    echo json_encode([
+        'labels' => $labels,
+        'savings' => $savings
+    ]);
+    exit;
+}
+
 // Se il tipo di grafico non è riconosciuto
 echo json_encode(['error' => 'Tipo di grafico non valido']);
 ?>

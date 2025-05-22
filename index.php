@@ -279,6 +279,71 @@ $stmt->close();
             </div>
         </div>
 
+        <!-- Widget grafico: andamento risparmio ultimi 12 mesi -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-chart-area"></i> Andamento Risparmio (ultimi 12 mesi)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="savings-trend-chart" height="90"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('savings-trend-chart');
+            if (ctx) {
+                fetch('get_chart_data.php?type=savings_trend')
+                    .then(response => response.json())
+                    .then(data => {
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.labels,
+                                datasets: [{
+                                    label: 'Risparmio',
+                                    data: data.savings,
+                                    borderColor: '#007bff',
+                                    backgroundColor: 'rgba(0,123,255,0.1)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    pointRadius: 4,
+                                    pointBackgroundColor: '#007bff',
+                                    pointBorderColor: '#fff',
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: true, position: 'top' },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Risparmio: ' + context.raw + ' €';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) { return value + ' €'; }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+            }
+        });
+        </script>
+        <!-- Fine widget grafico risparmio -->
+
         <!-- Tabelle e obiettivi -->
         <div class="row">
             <div class="col-md-7">
