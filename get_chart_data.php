@@ -1,5 +1,14 @@
 <?php
 require_once 'inc/config.php';
+session_start();
+
+// Verifica che l'utente sia autenticato
+if (!isset($_SESSION['user_phone'])) {
+    echo json_encode(['error' => 'Utente non autenticato']);
+    exit;
+}
+
+$user_phone = $_SESSION['user_phone'];
 
 // Verifica che sia stato fornito un tipo di grafico
 if (!isset($_GET['type']) || empty($_GET['type'])) {
@@ -27,20 +36,22 @@ if ($chart_type === 'income_expense') {
         // Ottieni le entrate del mese
         $sql_income = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
                      WHERE type = 'entrata' 
+                     AND user_phone = '" . $conn->real_escape_string($user_phone) . "' 
                      AND MONTH(date) = $month 
                      AND YEAR(date) = $year";
         
         $result_income = $conn->query($sql_income);
-        $income = $result_income->fetch_assoc()['total'];
+        $income = $result_income ? $result_income->fetch_assoc()['total'] : 0;
         
         // Ottieni le uscite del mese
         $sql_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
                       WHERE type = 'uscita' 
+                      AND user_phone = '" . $conn->real_escape_string($user_phone) . "' 
                       AND MONTH(date) = $month 
                       AND YEAR(date) = $year";
         
         $result_expense = $conn->query($sql_expense);
-        $expense = $result_expense->fetch_assoc()['total'];
+        $expense = $result_expense ? $result_expense->fetch_assoc()['total'] : 0;
         
         // Calcola il risparmio del mese
         $savings = $income - $expense;
@@ -66,7 +77,7 @@ if ($chart_type === 'income_expense') {
 if ($chart_type === 'expense_categories') {
     $month = isset($_GET['month']) ? intval($_GET['month']) : date('m');
     $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-    $sql = "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'uscita' AND MONTH(date) = $month AND YEAR(date) = $year GROUP BY category ORDER BY total DESC";
+    $sql = "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'uscita' AND user_phone = '" . $conn->real_escape_string($user_phone) . "' AND MONTH(date) = $month AND YEAR(date) = $year GROUP BY category ORDER BY total DESC";
     $result = $conn->query($sql);
     $categories = [];
     $amounts = [];
@@ -95,7 +106,7 @@ if ($chart_type === 'daily_trend') {
     $labels = [];
     $income = array_fill(1, $days, 0);
     $expense = array_fill(1, $days, 0);
-    $sql = "SELECT DAY(date) as day, type, SUM(amount) as total FROM transactions WHERE MONTH(date) = $month AND YEAR(date) = $year GROUP BY day, type";
+    $sql = "SELECT DAY(date) as day, type, SUM(amount) as total FROM transactions WHERE user_phone = '" . $conn->real_escape_string($user_phone) . "' AND MONTH(date) = $month AND YEAR(date) = $year GROUP BY day, type";
     $result = $conn->query($sql);
     if ($result && $result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
