@@ -221,9 +221,9 @@ $stmt->close();
                                     <?php
                                     require_once 'inc/config.php';
                                     
-                                    // Bilancio totale
-                                    $income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata'")->fetch_assoc()['total'];
-                                    $expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita'")->fetch_assoc()['total'];
+                                    // Bilancio totale SOLO per utente loggato
+                                    $income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
+                                    $expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
                                     $balance = $income - $expense;
                                     ?>
                                     <h3><?php echo format_currency($balance); ?></h3>
@@ -258,8 +258,8 @@ $stmt->close();
                                 <div class="inner">
                                     <?php
                                     $m = date('m'); $y = date('Y');
-                                    $monthly_income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
-                                    $monthly_expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
+                                    $monthly_income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND user_phone='".$conn->real_escape_string($phone)."' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
+                                    $monthly_expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."' AND MONTH(date)=$m AND YEAR(date)=$y")->fetch_assoc()['total'];
                                     $monthly_savings = $monthly_income - $monthly_expense;
                                     ?>
                                     <h3><?php echo format_currency($monthly_savings); ?></h3>
@@ -293,7 +293,7 @@ $stmt->close();
                                             </thead>
                                             <tbody>
                                                 <?php
-                                                $sql = "SELECT t.*, c.name as category_name, c.color FROM transactions t LEFT JOIN categories c ON t.category = c.name AND t.type = c.type ORDER BY t.date DESC LIMIT 10";
+                                                $sql = "SELECT t.*, c.name as category_name, c.color FROM transactions t LEFT JOIN categories c ON t.category = c.name AND t.type = c.type WHERE t.user_phone='".$conn->real_escape_string($phone)."' ORDER BY t.date DESC LIMIT 10";
                                                 $result = $conn->query($sql);
                                                 if ($result && $result->num_rows > 0) {
                                                     while($row = $result->fetch_assoc()) {
@@ -392,7 +392,7 @@ $stmt->close();
                                 </div>
                                 <div class="card-body p-0">
                                     <?php
-                                    $sql = "SELECT * FROM savings_goals ORDER BY target_date ASC";
+                                    $sql = "SELECT * FROM savings_goals WHERE user_phone='".$conn->real_escape_string($phone)."' ORDER BY target_date ASC";
                                     $result = $conn->query($sql);
                                     if ($result && $result->num_rows > 0) {
                                         while($row = $result->fetch_assoc()) {
