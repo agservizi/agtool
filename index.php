@@ -258,7 +258,7 @@ $stmt->close();
         </div>
         <!-- /.row -->
 
-        <!-- Pulsanti azione rapida -->
+        <!-- Sezione azioni rapide -->
         <div class="mb-4">
             <a href="transactions.php" class="btn btn-primary mr-2"><i class="fas fa-plus"></i> Nuova Transazione</a>
             <a href="reports.php" class="btn btn-info mr-2"><i class="fas fa-chart-pie"></i> Reportistica</a>
@@ -363,6 +363,148 @@ $stmt->close();
             </div>
         </div>
         <!-- Fine tabelle -->
+
+        <!-- Nuovi widget dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-percentage"></i> Tasso di Risparmio</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        // Calcolo tasso di risparmio mensile
+                        $income = 0; $expense = 0; $savings_rate = 0;
+                        $sql = "SELECT SUM(CASE WHEN type='entrata' THEN amount ELSE 0 END) as income, SUM(CASE WHEN type='uscita' THEN amount ELSE 0 END) as expense FROM transactions WHERE MONTH(date)=MONTH(CURDATE()) AND YEAR(date)=YEAR(CURDATE()) AND user_phone='".$conn->real_escape_string($phone)."'";
+                        $res = $conn->query($sql);
+                        if($res && $row = $res->fetch_assoc()) {
+                            $income = floatval($row['income']);
+                            $expense = floatval($row['expense']);
+                            if($income > 0) $savings_rate = round((($income-$expense)/$income)*100,1);
+                        }
+                        ?>
+                        <span style="font-size:2.2em;font-weight:bold;"> <?php echo $savings_rate; ?>% </span>
+                        <div class="text-muted">Risparmio su entrate mese</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-bolt"></i> Spesa Media Giornaliera</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        // Calcolo spesa media giornaliera mese corrente
+                        $sql = "SELECT SUM(amount) as total FROM transactions WHERE type='uscita' AND MONTH(date)=MONTH(CURDATE()) AND YEAR(date)=YEAR(CURDATE()) AND user_phone='".$conn->real_escape_string($phone)."'";
+                        $res = $conn->query($sql);
+                        $total = ($res && $row = $res->fetch_assoc()) ? floatval($row['total']) : 0;
+                        $days = date('j');
+                        $media = $days > 0 ? $total/$days : 0;
+                        ?>
+                        <span style="font-size:2.2em;font-weight:bold;"> <?php echo format_currency($media); ?> </span>
+                        <div class="text-muted">Spesa media/giorno (mese)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-trophy"></i> Categoria Top Spesa</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        // Categoria con più spesa mese corrente
+                        $sql = "SELECT category, SUM(amount) as tot FROM transactions WHERE type='uscita' AND MONTH(date)=MONTH(CURDATE()) AND YEAR(date)=YEAR(CURDATE()) AND user_phone='".$conn->real_escape_string($phone)."' GROUP BY category ORDER BY tot DESC LIMIT 1";
+                        $res = $conn->query($sql);
+                        if($res && $row = $res->fetch_assoc()) {
+                            echo '<span style="font-size:1.5em;font-weight:bold;">'.htmlspecialchars($row['category']).'</span><br><span class="badge badge-danger">'.format_currency($row['tot']).'</span>';
+                        } else {
+                            echo '<span class="text-muted">Nessuna spesa registrata</span>';
+                        }
+                        ?>
+                        <div class="text-muted">Categoria più costosa (mese)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fine nuovi widget dashboard -->
+
+        <!-- Widget aggiuntivi personalizzati -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-bell"></i> Notifiche Attive</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        // Conta notifiche non lette
+                        $notif_count = 0;
+                        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
+                        $stmt->bind_param('s', $phone);
+                        $stmt->execute();
+                        $stmt->bind_result($user_id);
+                        $stmt->fetch();
+                        $stmt->close();
+                        $notif_stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND status = 'pending'");
+                        $notif_stmt->bind_param('i', $user_id);
+                        $notif_stmt->execute();
+                        $notif_stmt->bind_result($notif_count);
+                        $notif_stmt->fetch();
+                        $notif_stmt->close();
+                        ?>
+                        <span style="font-size:2.2em;font-weight:bold;"> <?php echo $notif_count; ?> </span>
+                        <div class="text-muted">Notifiche non lette</div>
+                        <a href="notifications.php" class="btn btn-outline-primary btn-sm mt-2">Vedi tutte</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-secondary">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-calendar-alt"></i> Prossima Scadenza Ricorrente</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        // Prossima scadenza ricorrente
+                        $sql = "SELECT description, date FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."' AND date >= CURDATE() ORDER BY date ASC LIMIT 1";
+                        $res = $conn->query($sql);
+                        if($res && $row = $res->fetch_assoc()) {
+                            echo '<span style="font-size:1.1em;font-weight:bold;">'.htmlspecialchars($row['description']).'</span><br>';
+                            echo '<span class="badge badge-info">'.date('d/m/Y', strtotime($row['date'])).'</span>';
+                        } else {
+                            echo '<span class="text-muted">Nessuna scadenza imminente</span>';
+                        }
+                        ?>
+                        <div class="text-muted">Ricorrenza più vicina</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-dark">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-star"></i> Consiglio del Giorno</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <?php
+                        // Consiglio random dal DB
+                        $tip = '';
+                        $sql = "SELECT title, description FROM financial_tips WHERE is_active=1 ORDER BY RAND() LIMIT 1";
+                        $res = $conn->query($sql);
+                        if($res && $row = $res->fetch_assoc()) {
+                            $tip = '<strong>'.htmlspecialchars($row['title']).'</strong><br><span style=\'font-size:0.95em;\'>'.htmlspecialchars($row['description']).'</span>';
+                        } else {
+                            $tip = 'Nessun consiglio disponibile.';
+                        }
+                        echo $tip;
+                        ?>
+                        <div class="text-muted mt-2">Suggerimento finanziario</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Fine widget aggiuntivi personalizzati -->
 
         <!-- Pulsanti rapidi -->
         <div class="mb-4">
