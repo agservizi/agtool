@@ -62,38 +62,4 @@ include 'header.php';
 <?php if (isset($_GET['error'])): ?>
 <script>document.addEventListener('DOMContentLoaded',function(){showToast('error','Errore nell\'operazione sulle notifiche!');});</script>
 <?php endif; ?>
-<?php
-// Endpoint AJAX per badge notifiche
-if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
-    $unread_count = 0;
-    $notifiche = [];
-    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-    $stmt->bind_param('s', $_SESSION['user_phone']);
-    $stmt->execute();
-    $stmt->bind_result($user_id);
-    $stmt->fetch();
-    $stmt->close();
-    $notif_stmt = $conn->prepare("SELECT status FROM notifications WHERE user_id = ? ORDER BY scheduled_at DESC, created_at DESC LIMIT 10");
-    $notif_stmt->bind_param('i', $user_id);
-    $notif_stmt->execute();
-    $notif_stmt->bind_result($status);
-    while($notif_stmt->fetch()) {
-        if ($status === 'pending') $unread_count++;
-    }
-    $notif_stmt->close();
-    echo json_encode(['unread_count'=>$unread_count]);
-    exit;
-}
-// Marca tutte le notifiche come lette (status='sent') al click sulla campanella
-if (isset($_GET['ajax']) && $_GET['ajax'] == 'read') {
-    $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-    $stmt->bind_param('s', $_SESSION['user_phone']);
-    $stmt->execute();
-    $stmt->bind_result($user_id);
-    $stmt->fetch();
-    $stmt->close();
-    $conn->query("UPDATE notifications SET status='sent', sent_at=NOW() WHERE user_id = $user_id AND status='pending'");
-    echo json_encode(['status'=>'ok']);
-    exit;
-}
-include 'footer.php';
+<?php include 'footer.php'; ?>

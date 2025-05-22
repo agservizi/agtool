@@ -1,14 +1,5 @@
 <?php
 require_once 'inc/config.php';
-session_start();
-
-// Verifica che l'utente sia autenticato
-if (!isset($_SESSION['user_phone'])) {
-    echo json_encode(['error' => 'Utente non autenticato']);
-    exit;
-}
-
-$user_phone = $_SESSION['user_phone'];
 
 // Verifica che sia stato fornito un tipo di grafico
 if (!isset($_GET['type']) || empty($_GET['type'])) {
@@ -36,22 +27,20 @@ if ($chart_type === 'income_expense') {
         // Ottieni le entrate del mese
         $sql_income = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
                      WHERE type = 'entrata' 
-                     AND user_phone = '" . $conn->real_escape_string($user_phone) . "' 
                      AND MONTH(date) = $month 
                      AND YEAR(date) = $year";
         
         $result_income = $conn->query($sql_income);
-        $income = $result_income ? $result_income->fetch_assoc()['total'] : 0;
+        $income = $result_income->fetch_assoc()['total'];
         
         // Ottieni le uscite del mese
         $sql_expense = "SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
                       WHERE type = 'uscita' 
-                      AND user_phone = '" . $conn->real_escape_string($user_phone) . "' 
                       AND MONTH(date) = $month 
                       AND YEAR(date) = $year";
         
         $result_expense = $conn->query($sql_expense);
-        $expense = $result_expense ? $result_expense->fetch_assoc()['total'] : 0;
+        $expense = $result_expense->fetch_assoc()['total'];
         
         // Calcola il risparmio del mese
         $savings = $income - $expense;
@@ -75,50 +64,50 @@ if ($chart_type === 'income_expense') {
 
 // Ottieni i dati per il grafico delle categorie di spesa
 if ($chart_type === 'expense_categories') {
+    // Ottieni il mese e l'anno corrente
     $month = isset($_GET['month']) ? intval($_GET['month']) : date('m');
     $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-    $sql = "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'uscita' AND user_phone = '" . $conn->real_escape_string($user_phone) . "' AND MONTH(date) = $month AND YEAR(date) = $year GROUP BY category ORDER BY total DESC";
+    
+    // Ottieni le categorie di spesa per il mese selezionato
+    $sql = "SELECT category, SUM(amount) as total 
+            FROM transactions 
+            WHERE type = 'uscita' 
+            AND MONTH(date) = $month 
+            AND YEAR(date) = $year 
+            GROUP BY category 
+            ORDER BY total DESC";
+    
     $result = $conn->query($sql);
+    
     $categories = [];
     $amounts = [];
-    $colors = ['#007bff','#28a745','#dc3545','#ffc107','#17a2b8','#6f42c1','#fd7e14','#20c997','#6610f2','#e83e8c'];
-    $i = 0;
-    if ($result && $result->num_rows > 0) {
+    $colors = [];
+    
+    if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            $categories[] = $row['category'];
-            $amounts[] = floatval($row['total']);
-            $i++;
+            $category = $row['category'];
+            
+            // Ottieni il colore della categoria
+            $sql_color = "SELECT color FROM categories WHERE name = '$category' AND type = 'uscita'";
+            $result_color = $conn->query($sql_color);
+            
+            if ($result_color->num_rows > 0) {
+                $color = $result_color->fetch_assoc()['color'];
+            } else {
+                $color = '#' . substr(md5($category), 0, 6); // Genera un colore casuale basato sul nome della categoria
+            }
+            
+            $categories[] = $category;
+            $amounts[] = $row['total'];
+            $colors[] = $color;
         }
     }
+    
+    // Restituisci i dati in formato JSON
     echo json_encode([
         'categories' => $categories,
         'amounts' => $amounts,
-        'colors' => array_slice($colors,0,count($categories))
-    ]);
-    exit;
-}
-
-// Ottieni i dati per il grafico dell'andamento giornaliero
-if ($chart_type === 'daily_trend') {
-    $month = isset($_GET['month']) ? intval($_GET['month']) : date('m');
-    $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-    $days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-    $labels = [];
-    $income = array_fill(1, $days, 0);
-    $expense = array_fill(1, $days, 0);
-    $sql = "SELECT DAY(date) as day, type, SUM(amount) as total FROM transactions WHERE user_phone = '" . $conn->real_escape_string($user_phone) . "' AND MONTH(date) = $month AND YEAR(date) = $year GROUP BY day, type";
-    $result = $conn->query($sql);
-    if ($result && $result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            if ($row['type'] == 'entrata') $income[intval($row['day'])] = floatval($row['total']);
-            else $expense[intval($row['day'])] = floatval($row['total']);
-        }
-    }
-    for ($d=1; $d<=$days; $d++) $labels[] = $d;
-    echo json_encode([
-        'labels' => $labels,
-        'income' => array_values($income),
-        'expense' => array_values($expense)
+        'colors' => $colors
     ]);
     exit;
 }

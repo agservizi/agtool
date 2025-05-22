@@ -136,36 +136,6 @@ if ($conn->query($sql) === FALSE) {
     $success[] = "Tabella user_settings creata o già esistente.";
 }
 
-// Crea tabella sottoscrizioni push
-$sql = "CREATE TABLE IF NOT EXISTS push_subscriptions (
-    user_id INT(11) NOT NULL,
-    endpoint VARCHAR(512) NOT NULL,
-    p256dh VARCHAR(255) NOT NULL,
-    auth VARCHAR(255) NOT NULL,
-    PRIMARY KEY (user_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-if ($conn->query($sql) === FALSE) {
-    $errors[] = "Errore nella creazione della tabella push_subscriptions: " . $conn->error;
-} else {
-    $success[] = "Tabella push_subscriptions creata o già esistente.";
-}
-
-// Crea tabella exported_reports
-$sql = "CREATE TABLE IF NOT EXISTS exported_reports (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    user_id INT(11) NOT NULL,
-    export_type VARCHAR(20) NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-if ($conn->query($sql) === FALSE) {
-    $errors[] = "Errore nella creazione della tabella exported_reports: " . $conn->error;
-} else {
-    $success[] = "Tabella exported_reports creata o già esistente.";
-}
-
 // Inserisci utente di default solo se la tabella è vuota
 $check = $conn->query("SELECT COUNT(*) as total FROM users");
 if ($check && ($row = $check->fetch_assoc()) && $row['total'] == 0) {
