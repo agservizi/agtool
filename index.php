@@ -219,8 +219,6 @@ $stmt->close();
                             <div class="small-box bg-info">
                                 <div class="inner">
                                     <?php
-                                    require_once 'inc/config.php';
-                                    
                                     // Bilancio totale SOLO per utente loggato
                                     $income = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='entrata' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
                                     $expense = $conn->query("SELECT COALESCE(SUM(amount),0) as total FROM transactions WHERE type='uscita' AND user_phone='".$conn->real_escape_string($phone)."'")->fetch_assoc()['total'];
